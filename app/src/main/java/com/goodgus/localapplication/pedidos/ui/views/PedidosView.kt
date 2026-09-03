@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.views
+package com.goodgus.localapplication.pedidos.ui.views
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.goodgus.localapplication.components.InfoCard
 import com.goodgus.localapplication.models.data.Pedidos
-import com.goodgus.localapplication.viewModels.PedidosViewModel
+import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
 
 @Composable
 fun PedidoScreen(

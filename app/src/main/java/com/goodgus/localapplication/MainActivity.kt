@@ -21,7 +21,6 @@ import com.goodgus.localapplication.DAO.AppDataBase
 import com.goodgus.localapplication.DAO.ProductoDAO
 import com.goodgus.localapplication.application.LocalApplication
 import com.goodgus.localapplication.core.navigation.NavigationWrapper
-import com.goodgus.localapplication.repository.ProductoRepository
 import com.goodgus.localapplication.ui.theme.LocalApplicationTheme
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.toList

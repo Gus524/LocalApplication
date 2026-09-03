@@ -1,6 +1,8 @@
 package com.goodgus.localapplication.DAO
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.goodgus.localapplication.models.data.Cuenta
 import com.goodgus.localapplication.models.data.Venta
@@ -8,16 +10,22 @@ import com.goodgus.localapplication.models.dataView.GetCuenta
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Interfaz de los querys para nuestra tabla Cuenta
+ * Interfaz de los querys para nuestra tabla Cuenta y sus líneas de venta
  *
  * Se establecen los querys para obtener las cuentas, agregar y actualizar las cuentas
  */
 
 
 @Dao
-interface CuentaDAO {
+interface CuentaDAO : BaseDao<Cuenta> {
     @Query("SELECT * FROM Cuenta")
     fun getCuenta(): Flow<List<Cuenta>>
+
+    @Query("SELECT * FROM Cuenta")
+    fun getAllCuentas(): List<Cuenta>
+
+    @Query("SELECT * FROM Cuenta WHERE id_cuenta = :idCuenta")
+    fun getCuentaById(idCuenta: Int): Cuenta?
 
     @Query("SELECT * FROM GetCuenta WHERE estado_cuenta = 1 AND estado_venta = 1 ORDER BY id_venta DESC")
     fun getCuentaActiva(): Flow<List<GetCuenta>>
@@ -34,6 +42,18 @@ interface CuentaDAO {
     @Query("SELECT id_cuenta FROM Cuenta WHERE estado_cuenta = 1 LIMIT 1")
     fun getAccountId(): Int
 
+    @Query("SELECT MAX(id_cuenta) FROM Cuenta")
+    fun getMaxId(): Int?
+
     @Query("INSERT INTO Cuenta (estado_cuenta) VALUES (1)")
-    fun addAccount() : Long
+    fun addAccount(): Long
+
+    @Query("SELECT * FROM Venta WHERE id_cuenta = :idCuenta")
+    fun getVentasByCuentaId(idCuenta: Int): List<Venta>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertVentas(ventas: List<Venta>)
+
+    @Query("DELETE FROM Venta WHERE id_cuenta = :idCuenta")
+    fun deleteVentasByCuentaId(idCuenta: Int): Int
 }

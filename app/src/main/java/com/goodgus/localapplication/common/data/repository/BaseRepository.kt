@@ -25,14 +25,24 @@ abstract class BaseRepository<TAggregate : AggregateRoot<TId>, TId, TPersistence
 
     /**
      * Hook Template Method (Hydration): La implementación concreta ejecuta la consulta
-     * completa con sus relaciones.
+     * completa con sus relaciones por ID.
      */
     protected abstract suspend fun onHydrateQuery(id: TId): TPersistence?
+
+    /**
+     * Hook Template Method (List Query): La implementación concreta ejecuta la consulta
+     * de listado general de entidades de persistencia.
+     */
+    protected open suspend fun onGetAllQuery(): List<TPersistence> = emptyList()
 
     override suspend fun obtenerPorId(id: TId): TAggregate? = executeIo {
         val persistence = onHydrateQuery(id)
         persistence?.let { mapper.toDomain(it) }
     }.getOrNull()
+
+    override suspend fun obtenerTodos(): List<TAggregate> = executeIo {
+        toDomainList(onGetAllQuery())
+    }.getOrDefault(emptyList())
 
     override suspend fun guardar(agregado: TAggregate): Result<Unit> = executeIo {
         val persistence = mapper.toPersistence(agregado)

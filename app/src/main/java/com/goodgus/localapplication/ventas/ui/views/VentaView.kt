@@ -1,14 +1,10 @@
-package com.goodgus.localapplication.views
+package com.goodgus.localapplication.ventas.ui.views
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +17,8 @@ import com.goodgus.localapplication.components.BotonesAcciones
 import com.goodgus.localapplication.components.CampoCantidad
 import com.goodgus.localapplication.components.CampoPrecio
 import com.goodgus.localapplication.components.CampoTitle
-import com.goodgus.localapplication.components.ProductButton
 import com.goodgus.localapplication.components.SearchProduct
-import com.goodgus.localapplication.viewModels.VentaViewModel
+import com.goodgus.localapplication.ventas.ui.viewModels.VentaViewModel
 
 @Composable
 fun VentaScreen(

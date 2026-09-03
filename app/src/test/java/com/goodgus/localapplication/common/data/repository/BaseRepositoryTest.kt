@@ -74,6 +74,10 @@ class BaseRepositoryTest {
             return dao.findById(id.valor)
         }
 
+        override suspend fun onGetAllQuery(): List<DummyPersistence> {
+            return dao.databaseTable.values.toList()
+        }
+
         override suspend fun siguienteId(): DummyId = DummyId("dummy-${idCounter++}")
 
         fun mapearListaDominio(entities: List<DummyPersistence>): List<DummyAggregate> {
@@ -183,5 +187,18 @@ class BaseRepositoryTest {
         val exception = resultado.exceptionOrNull()
         assertTrue(exception is IOException)
         assertEquals("Error de conexión a la base de datos", exception?.message)
+    }
+
+    @Test
+    fun `BaseRepository obtenerTodos recupera y mapea todas las entidades`() = runBlocking {
+        val item1 = DummyAggregate(id = DummyId("1"), nombre = "Item 1")
+        val item2 = DummyAggregate(id = DummyId("2"), nombre = "Item 2")
+        repository.guardar(item1)
+        repository.guardar(item2)
+
+        val todos = repository.obtenerTodos()
+        assertEquals(2, todos.size)
+        assertTrue(todos.any { it.id == DummyId("1") && it.nombre == "Item 1" })
+        assertTrue(todos.any { it.id == DummyId("2") && it.nombre == "Item 2" })
     }
 }

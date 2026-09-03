@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.views
+package com.goodgus.localapplication.pedidos.ui.views
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.goodgus.localapplication.components.BotonesAcciones
 import com.goodgus.localapplication.components.CampoText
-import com.goodgus.localapplication.viewModels.EditPedidoViewModel
+import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoViewModel
 
 @Composable
 fun EditPedidoScreen(

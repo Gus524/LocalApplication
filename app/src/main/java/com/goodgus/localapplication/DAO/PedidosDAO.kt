@@ -14,11 +14,19 @@ import kotlinx.coroutines.flow.Flow
 
 
 @Dao
-interface PedidosDAO {
+interface PedidosDAO : BaseDao<Pedidos> {
     @Query("SELECT * FROM Pedidos")
     fun getPedidos(): Flow<List<Pedidos>>
 
+    @Query("SELECT * FROM Pedidos")
+    fun getAllPedidos(): List<Pedidos>
+
+    @Query("SELECT * FROM Pedidos WHERE id_pedido = :idPedido")
+    fun getPedidoById(idPedido: Int): Pedidos?
+
+    @Query("SELECT MAX(id_pedido) FROM Pedidos")
+    fun getMaxId(): Int?
+
     @Query("INSERT INTO Pedidos (fecha_pedido, descripcion, detalles) VALUES (:fechaPedido, :descripcion, :detalles)")
     fun addPedido(fechaPedido: String, descripcion: String, detalles: String): Long
-
 }

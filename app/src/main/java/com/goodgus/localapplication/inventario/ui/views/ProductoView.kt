@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.views
+package com.goodgus.localapplication.inventario.ui.views
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +17,7 @@ import com.goodgus.localapplication.components.BotonesAcciones
 import com.goodgus.localapplication.components.CampoCantidad
 import com.goodgus.localapplication.components.CampoPrecio
 import com.goodgus.localapplication.components.CampoText
-import com.goodgus.localapplication.viewModels.ProductoViewModel
+import com.goodgus.localapplication.inventario.ui.viewModels.ProductoViewModel
 
 @Composable
 fun ProductoScreen(

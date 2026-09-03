@@ -49,6 +49,8 @@ class VentasUseCasesTest {
             cuentas.remove(id)
             return Result.success(Unit)
         }
+
+        override suspend fun obtenerTodos(): List<Cuenta> = cuentas.values.toList()
     }
 
     private class FakeProductoRepository : IProductoRepository {

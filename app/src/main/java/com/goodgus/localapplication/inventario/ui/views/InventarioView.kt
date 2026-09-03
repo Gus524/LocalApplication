@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.views
+package com.goodgus.localapplication.inventario.ui.views
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.goodgus.localapplication.components.InfoCard
 import com.goodgus.localapplication.components.ShowAlert
 import com.goodgus.localapplication.models.data.Producto
-import com.goodgus.localapplication.viewModels.InventarioViewModel
+import com.goodgus.localapplication.inventario.ui.viewModels.InventarioViewModel
 
 @Composable
 fun InventarioScreen(

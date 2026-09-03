@@ -38,6 +38,8 @@ class PedidosUseCasesTest {
             pedidos.remove(id)
             return Result.success(Unit)
         }
+
+        override suspend fun obtenerTodos(): List<Pedido> = pedidos.values.toList()
     }
 
     private lateinit var pedidoRepository: FakePedidoRepository

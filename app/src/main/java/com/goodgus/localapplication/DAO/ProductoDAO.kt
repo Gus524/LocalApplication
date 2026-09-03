@@ -12,7 +12,7 @@ import com.goodgus.localapplication.models.data.Producto
 
 
 @Dao
-interface ProductoDAO {
+interface ProductoDAO : BaseDao<Producto> {
 
     @Query("SELECT * FROM Producto")
     fun getAllProducts(): List<Producto>
@@ -22,6 +22,9 @@ interface ProductoDAO {
 
     @Query("SELECT * FROM Producto WHERE id_producto = :idProducto")
     fun getProductId(idProducto: Int): Producto
+
+    @Query("SELECT MAX(id_producto) FROM Producto")
+    fun getMaxId(): Int?
 
     @Query("UPDATE Producto SET estado = 0 WHERE id_producto = :idProducto")
     fun downProduct(idProducto: Int): Int

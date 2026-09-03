@@ -19,6 +19,7 @@ navigationCompose = "2.8.7"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+coroutines = "1.9.0"
 
 [libraries]
 # Core Android & Lifecycle
@@ -63,6 +64,7 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

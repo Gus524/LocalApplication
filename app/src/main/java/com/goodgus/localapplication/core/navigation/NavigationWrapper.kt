@@ -15,18 +15,18 @@ import com.goodgus.localapplication.components.AppScaffold
 import com.goodgus.localapplication.utilidades.extractRuta
 import com.goodgus.localapplication.utilidades.getContext
 import com.goodgus.localapplication.utilidades.getTitle
-import com.goodgus.localapplication.viewModels.EditPedidoViewModel
+import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoViewModel
 import com.goodgus.localapplication.viewModels.HomeViewModel
-import com.goodgus.localapplication.viewModels.InventarioViewModel
-import com.goodgus.localapplication.viewModels.PedidosViewModel
-import com.goodgus.localapplication.viewModels.ProductoViewModel
-import com.goodgus.localapplication.viewModels.VentaViewModel
-import com.goodgus.localapplication.views.EditPedidoScreen
+import com.goodgus.localapplication.inventario.ui.viewModels.InventarioViewModel
+import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
+import com.goodgus.localapplication.inventario.ui.viewModels.ProductoViewModel
+import com.goodgus.localapplication.ventas.ui.viewModels.VentaViewModel
+import com.goodgus.localapplication.pedidos.ui.views.EditPedidoScreen
 import com.goodgus.localapplication.views.HomeScreen
-import com.goodgus.localapplication.views.InventarioScreen
-import com.goodgus.localapplication.views.PedidoScreen
-import com.goodgus.localapplication.views.ProductoScreen
-import com.goodgus.localapplication.views.VentaScreen
+import com.goodgus.localapplication.inventario.ui.views.InventarioScreen
+import com.goodgus.localapplication.pedidos.ui.views.PedidoScreen
+import com.goodgus.localapplication.inventario.ui.views.ProductoScreen
+import com.goodgus.localapplication.ventas.ui.views.VentaScreen
 
 /**
  * Composable encargado de la navegacion de toda nuestra aplicacion
