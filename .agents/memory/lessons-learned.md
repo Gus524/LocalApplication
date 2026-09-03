@@ -22,7 +22,11 @@ For any new domain module, feature, or phase:
 * **Pure Domain vs Use Case Separation:**
   * **Aggregate Root Invariants:** Only receive validated VOs and enforce atomic state/balance transitions in pure immutable Kotlin.
   * **Domain Exceptions:** Strictly reserved for broken domain business invariants (e.g., `CompraYaFinalizadaException`, `StockInsuficienteException`). Lookups and existence checks ("Record not found in database") belong to the Application/UseCase layer orchestration.
-  * **Use Cases:** Orchestrate data origin (e.g. default catalog price vs custom discounted price input) and entity lookups.
+* **Use Cases & Application Layer Architecture:**
+  * Package: `com.goodgus.localapplication.<bc>.usecase`
+  * Abstract `BaseUseCase<in P, R>` in `common.usecase` enforces `protected abstract suspend fun ejecutar(params: P): Result<R>`. It acts as a safety boundary for catching unhandled domain exceptions and switching dispatchers (`Dispatchers.Default`).
+  * Concrete Use Cases must never throw synthetic exceptions (`throw NoSuchElementException`, `throw IllegalStateException`). Controlled repository flows and lookups must strictly return `Result.failure(error)` early or map repository results.
+  * Aggregate ID generation is delegated to `IRepository.siguienteId(): TId`. Creation Param DTOs never ask the UI for manual IDs.
 * **Existing Storage & Persistence:**
   * Existing Room models (`models/data/*`) remain as internal persistence data layer, decoupled from Domain via Mappers.
   * Abstract `BaseRepository` in data layer will unify shared CRUD operations and enforce `IMapper<TDomain, TPersistence>` implementations to eliminate boilerplate.

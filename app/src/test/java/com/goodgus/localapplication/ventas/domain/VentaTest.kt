@@ -1,8 +1,8 @@
 package com.goodgus.localapplication.ventas.domain
 
+import com.goodgus.localapplication.common.domain.Cantidad
 import com.goodgus.localapplication.common.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
-import com.goodgus.localapplication.ventas.domain.model.CantidadVenta
 import com.goodgus.localapplication.ventas.domain.model.DetalleVenta
 import com.goodgus.localapplication.ventas.domain.model.EstadoVenta
 import com.goodgus.localapplication.ventas.domain.model.Venta
@@ -14,19 +14,9 @@ import org.junit.Test
 class VentaTest {
 
     @Test
-    fun `no permite crear cantidad de venta menor a 1`() {
-        assertThrows(IllegalArgumentException::class.java) {
-            CantidadVenta(0)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            CantidadVenta(-3)
-        }
-    }
-
-    @Test
     fun `calcula subtotal correctamente para venta activa`() {
         val detalle = DetalleVenta(
-            cantidad = CantidadVenta(3),
+            cantidad = Cantidad(3),
             hora = "14:30",
             precioUnitario = Dinero(15.0)
         )
@@ -44,7 +34,7 @@ class VentaTest {
     @Test
     fun `subtotal de venta cancelada es cero`() {
         val detalle = DetalleVenta(
-            cantidad = CantidadVenta(2),
+            cantidad = Cantidad(2),
             hora = "14:30",
             precioUnitario = Dinero(20.0)
         )

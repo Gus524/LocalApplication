@@ -1,5 +1,6 @@
 package com.goodgus.localapplication.ventas.domain
 
+import com.goodgus.localapplication.common.domain.Cantidad
 import com.goodgus.localapplication.common.domain.CuentaCerradaException
 import com.goodgus.localapplication.common.domain.Dinero
 import com.goodgus.localapplication.common.domain.StockInsuficienteException
@@ -9,7 +10,6 @@ import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
-import com.goodgus.localapplication.ventas.domain.model.CantidadVenta
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.model.EstadoCuenta
@@ -58,7 +58,7 @@ class CuentaTest {
         val resultado = cuenta.agregarVenta(
             ventaId = VentaId(101),
             producto = producto,
-            cantidad = CantidadVenta(2),
+            cantidad = Cantidad(2),
             hora = "10:15",
             precioUnitario = producto.precioVenta
         )
@@ -81,7 +81,7 @@ class CuentaTest {
         val resultado = cuenta.agregarVenta(
             ventaId = VentaId(102),
             producto = producto,
-            cantidad = CantidadVenta(3),
+            cantidad = Cantidad(3),
             hora = "11:00",
             precioUnitario = Dinero(15.0)
         )
@@ -100,7 +100,7 @@ class CuentaTest {
         val resultado = cuenta.agregarVenta(
             ventaId = VentaId(103),
             producto = producto,
-            cantidad = CantidadVenta(1),
+            cantidad = Cantidad(1),
             hora = "12:00",
             precioUnitario = producto.precioVenta
         )
@@ -117,7 +117,7 @@ class CuentaTest {
         val resultado = cuenta.agregarVenta(
             ventaId = VentaId(104),
             producto = producto,
-            cantidad = CantidadVenta(5),
+            cantidad = Cantidad(5),
             hora = "12:30",
             precioUnitario = producto.precioVenta
         )
@@ -134,7 +134,7 @@ class CuentaTest {
         val (cuentaConVenta, _) = cuenta.agregarVenta(
             ventaId = VentaId(201),
             producto = producto,
-            cantidad = CantidadVenta(3),
+            cantidad = Cantidad(3),
             hora = "13:00",
             precioUnitario = producto.precioVenta
         ).getOrThrow()

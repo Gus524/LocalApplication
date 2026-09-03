@@ -1,6 +1,7 @@
 package com.goodgus.localapplication.ventas.domain.model
 
 import com.goodgus.localapplication.common.domain.AggregateRoot
+import com.goodgus.localapplication.common.domain.Cantidad
 import com.goodgus.localapplication.common.domain.CuentaCerradaException
 import com.goodgus.localapplication.common.domain.Dinero
 import com.goodgus.localapplication.common.domain.VentaNoEncontradaException
@@ -30,7 +31,7 @@ data class Cuenta(
     fun agregarVenta(
         ventaId: VentaId,
         producto: Producto,
-        cantidad: CantidadVenta,
+        cantidad: Cantidad,
         hora: String,
         precioUnitario: Dinero
     ): Result<Pair<Cuenta, Producto>> {
