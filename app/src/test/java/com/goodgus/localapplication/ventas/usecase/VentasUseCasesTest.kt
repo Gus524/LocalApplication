@@ -96,11 +96,11 @@ class VentasUseCasesTest {
         cuentaRepository = FakeCuentaRepository()
         productoRepository = FakeProductoRepository()
 
-        abrirCuentaUseCase = AbrirCuentaUseCase(cuentaRepository, testDispatcher)
-        registrarVentaUseCase = RegistrarVentaUseCase(cuentaRepository, productoRepository, testDispatcher)
-        cancelarVentaUseCase = CancelarVentaUseCase(cuentaRepository, testDispatcher)
-        cerrarCuentaUseCase = CerrarCuentaUseCase(cuentaRepository, testDispatcher)
-        consultarCuentaUseCase = ConsultarCuentaUseCase(cuentaRepository, testDispatcher)
+        abrirCuentaUseCase = AbrirCuentaUseCase(cuentaRepository)
+        registrarVentaUseCase = RegistrarVentaUseCase(cuentaRepository, productoRepository)
+        cancelarVentaUseCase = CancelarVentaUseCase(cuentaRepository)
+        cerrarCuentaUseCase = CerrarCuentaUseCase(cuentaRepository)
+        consultarCuentaUseCase = ConsultarCuentaUseCase(cuentaRepository)
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.goodgus.localapplication.inventario.ui.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
@@ -9,18 +8,20 @@ import com.goodgus.localapplication.inventario.usecase.ActualizarPrecioParams
 import com.goodgus.localapplication.inventario.usecase.ActualizarPrecioProductoUseCase
 import com.goodgus.localapplication.inventario.usecase.RegistrarProductoParams
 import com.goodgus.localapplication.inventario.usecase.RegistrarProductoUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProductoViewModel(
-    app: Application,
+@HiltViewModel
+class ProductoViewModel @Inject constructor(
     private val registrarProductoUseCase: RegistrarProductoUseCase,
     private val actualizarPrecioProductoUseCase: ActualizarPrecioProductoUseCase,
     private val productoRepository: IProductoRepository
-): AndroidViewModel(app) {
+) : ViewModel() {
     data class ProductoUIState(
         val cantidad: Int = 0,
         val mensaje: String? = null,
@@ -125,23 +126,6 @@ class ProductoViewModel(
                 }
             } else {
                 _uiState.update { it.copy(isBusy = false, mensaje = "Producto no encontrado") }
-            }
-        }
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val productoDAO = app.database.productoDao()
-                    val productoRepository = com.goodgus.localapplication.inventario.data.repository.ProductoRepository(productoDAO)
-                    val registrarUseCase = RegistrarProductoUseCase(productoRepository)
-                    val actualizarPrecioUseCase = ActualizarPrecioProductoUseCase(productoRepository)
-
-                    return ProductoViewModel(app, registrarUseCase, actualizarPrecioUseCase, productoRepository) as T
-                }
             }
         }
     }

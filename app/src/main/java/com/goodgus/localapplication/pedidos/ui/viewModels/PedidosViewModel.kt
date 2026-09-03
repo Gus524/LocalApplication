@@ -1,21 +1,22 @@
 package com.goodgus.localapplication.pedidos.ui.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.models.data.Pedidos
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PedidosViewModel(
-    app: Application,
+@HiltViewModel
+class PedidosViewModel @Inject constructor(
     private val pedidoRepository: IPedidoRepository,
-) : AndroidViewModel(app) {
+) : ViewModel() {
     data class PedidoUIState(
         val pedidoSeleccionado: Pedidos? = null,
         val pedidos: List<Pedidos> = emptyList(),
@@ -50,20 +51,5 @@ class PedidosViewModel(
             descripcion = domain.informacion.descripcion,
             detalles = domain.informacion.detalles
         )
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val pedidosDAO = app.database.pedidosDAO()
-                    val pedidoRepository = com.goodgus.localapplication.pedidos.data.repository.PedidoRepository(pedidosDAO)
-
-                    return PedidosViewModel(app, pedidoRepository) as T
-                }
-            }
-        }
     }
 }

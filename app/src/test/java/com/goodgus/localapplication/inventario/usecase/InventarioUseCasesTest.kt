@@ -61,10 +61,10 @@ class InventarioUseCasesTest {
     @Before
     fun setup() {
         repository = FakeProductoRepository()
-        registrarProductoUseCase = RegistrarProductoUseCase(repository, testDispatcher)
-        actualizarPrecioUseCase = ActualizarPrecioProductoUseCase(repository, testDispatcher)
-        cambiarEstadoUseCase = CambiarEstadoProductoUseCase(repository, testDispatcher)
-        consultarInventarioUseCase = ConsultarInventarioUseCase(repository, testDispatcher)
+        registrarProductoUseCase = RegistrarProductoUseCase(repository)
+        actualizarPrecioUseCase = ActualizarPrecioProductoUseCase(repository)
+        cambiarEstadoUseCase = CambiarEstadoProductoUseCase(repository)
+        consultarInventarioUseCase = ConsultarInventarioUseCase(repository)
     }
 
     @Test

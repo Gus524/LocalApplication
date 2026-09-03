@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.components
+package com.goodgus.localapplication.common.components
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar

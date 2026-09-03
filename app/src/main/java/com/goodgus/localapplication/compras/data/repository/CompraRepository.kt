@@ -10,14 +10,16 @@ import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
 import com.goodgus.localapplication.models.data.Compra as CompraEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 
-class CompraRepository(
+class CompraRepository @Inject constructor(
     dao: CompraDAO,
-    private val productoDao: ProductoDAO? = null,
-    private val compraMapper: CompraMapper = CompraMapper(),
+    private val productoDao: ProductoDAO,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseRepository<Compra, CompraId, CompraEntity, CompraDAO>(dao, compraMapper, ioDispatcher),
+) : BaseRepository<Compra, CompraId, CompraEntity, CompraDAO>(dao, CompraMapper(), ioDispatcher),
     ICompraRepository {
+
+    private val compraMapper = CompraMapper()
 
     override suspend fun onHydrateQuery(id: CompraId): CompraEntity? {
         return dao.getCompraById(id.valor)

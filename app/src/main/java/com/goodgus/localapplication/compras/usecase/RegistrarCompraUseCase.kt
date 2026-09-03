@@ -14,6 +14,8 @@ import com.goodgus.localapplication.inventario.domain.repository.IProductoReposi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class ProductoCompraParams(
     val productoId: Int,
     val cantidad: Int,
@@ -25,11 +27,10 @@ data class RegistrarCompraParams(
     val listaCompra: List<ProductoCompraParams>
 )
 
-class RegistrarCompraUseCase(
+class RegistrarCompraUseCase @Inject constructor(
     private val compraRepository: ICompraRepository,
-    private val productoRepository: IProductoRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<RegistrarCompraParams, Compra>(dispatcher) {
+    private val productoRepository: IProductoRepository
+) : BaseUseCase<RegistrarCompraParams, Compra>() {
 
     override suspend fun ejecutar(params: RegistrarCompraParams): Result<Compra> {
         if (params.listaCompra.isEmpty()) {

@@ -52,7 +52,6 @@ class EditPedidoViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeRepository: FakePedidoRepository
     private lateinit var crearPedidoUseCase: CrearPedidoUseCase
     private lateinit var viewModel: EditPedidoViewModel
@@ -60,10 +59,9 @@ class EditPedidoViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         fakeRepository = FakePedidoRepository()
-        crearPedidoUseCase = CrearPedidoUseCase(fakeRepository, testDispatcher)
-        viewModel = EditPedidoViewModel(app, crearPedidoUseCase, fakeRepository)
+        crearPedidoUseCase = CrearPedidoUseCase(fakeRepository)
+        viewModel = EditPedidoViewModel(crearPedidoUseCase, fakeRepository)
     }
 
     @After

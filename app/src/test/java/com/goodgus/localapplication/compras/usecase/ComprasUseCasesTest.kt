@@ -90,9 +90,9 @@ class ComprasUseCasesTest {
         compraRepository = FakeCompraRepository()
         productoRepository = FakeProductoRepository()
 
-        registrarCompraUseCase = RegistrarCompraUseCase(compraRepository, productoRepository, testDispatcher)
-        cancelarCompraUseCase = CancelarCompraUseCase(compraRepository, testDispatcher)
-        consultarCompraUseCase = ConsultarCompraUseCase(compraRepository, testDispatcher)
+        registrarCompraUseCase = RegistrarCompraUseCase(compraRepository, productoRepository)
+        cancelarCompraUseCase = CancelarCompraUseCase(compraRepository)
+        consultarCompraUseCase = ConsultarCompraUseCase(compraRepository)
     }
 
     @Test

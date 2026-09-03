@@ -1,7 +1,6 @@
 package com.goodgus.localapplication.compras.ui.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
 import com.goodgus.localapplication.compras.usecase.CancelarCompraParams
@@ -9,18 +8,20 @@ import com.goodgus.localapplication.compras.usecase.CancelarCompraUseCase
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraParams
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraUseCase
 import com.goodgus.localapplication.models.data.Compra
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CompraViewModel(
-    app: Application,
+@HiltViewModel
+class CompraViewModel @Inject constructor(
     private val registrarCompraUseCase: RegistrarCompraUseCase,
     private val cancelarCompraUseCase: CancelarCompraUseCase,
     private val compraRepository: ICompraRepository
-): AndroidViewModel(app) {
+) : ViewModel() {
     data class CompraUIState(
         val idCompra: Int = 0,
         val compras: List<Compra> = emptyList(),
@@ -86,24 +87,5 @@ class CompraViewModel(
             totalCompra = domain.informacion.total.monto,
             fechaCompra = domain.informacion.fechaCompra
         )
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val productoDAO = app.database.productoDao()
-                    val compraDAO = app.database.compraDAO()
-                    val productoRepository = com.goodgus.localapplication.inventario.data.repository.ProductoRepository(productoDAO)
-                    val compraRepository = com.goodgus.localapplication.compras.data.repository.CompraRepository(compraDAO, productoDAO)
-                    val registrarCompraUseCase = RegistrarCompraUseCase(compraRepository, productoRepository)
-                    val cancelarCompraUseCase = CancelarCompraUseCase(compraRepository)
-
-                    return CompraViewModel(app, registrarCompraUseCase, cancelarCompraUseCase, compraRepository) as T
-                }
-            }
-        }
     }
 }

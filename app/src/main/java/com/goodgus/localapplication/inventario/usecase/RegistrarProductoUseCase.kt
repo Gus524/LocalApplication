@@ -10,6 +10,8 @@ import com.goodgus.localapplication.inventario.domain.repository.IProductoReposi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class RegistrarProductoParams(
     val nombre: String,
     val marca: String,
@@ -18,10 +20,9 @@ data class RegistrarProductoParams(
     val stockInicial: Int
 )
 
-class RegistrarProductoUseCase(
-    private val productoRepository: IProductoRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<RegistrarProductoParams, Producto>(dispatcher) {
+class RegistrarProductoUseCase @Inject constructor(
+    private val productoRepository: IProductoRepository
+) : BaseUseCase<RegistrarProductoParams, Producto>() {
 
     override suspend fun ejecutar(params: RegistrarProductoParams): Result<Producto> {
         val nuevoId = productoRepository.siguienteId()

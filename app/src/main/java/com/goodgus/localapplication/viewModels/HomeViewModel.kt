@@ -1,7 +1,6 @@
 package com.goodgus.localapplication.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.DAO.CuentaDAO
 import com.goodgus.localapplication.models.data.Cuenta as CuentaEntity
@@ -13,6 +12,7 @@ import com.goodgus.localapplication.ventas.usecase.CancelarVentaParams
 import com.goodgus.localapplication.ventas.usecase.CancelarVentaUseCase
 import com.goodgus.localapplication.ventas.usecase.CerrarCuentaParams
 import com.goodgus.localapplication.ventas.usecase.CerrarCuentaUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,15 +24,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class HomeViewModel(
-    app: Application,
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val abrirCuentaUseCase: AbrirCuentaUseCase,
     private val cerrarCuentaUseCase: CerrarCuentaUseCase,
     private val cancelarVentaUseCase: CancelarVentaUseCase,
     private val cuentaRepository: ICuentaRepository,
     private val cuentaDAO: CuentaDAO
-): AndroidViewModel(app) {
+) : ViewModel() {
     data class CuentaUIState(
         val cuenta: Flow<Any> = emptyFlow(),
         val showDelete: Boolean = false,
@@ -116,25 +117,6 @@ class HomeViewModel(
                 }
             }
             _uiState.update { it.copy(showDelete = false, idVenta = 0) }
-        }
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val productoDAO = app.database.productoDao()
-                    val cuentaDAO = app.database.cuentaDao()
-                    val cuentaRepository = com.goodgus.localapplication.ventas.data.repository.CuentaRepository(cuentaDAO, productoDAO)
-                    val abrirCuentaUseCase = AbrirCuentaUseCase(cuentaRepository)
-                    val cerrarCuentaUseCase = CerrarCuentaUseCase(cuentaRepository)
-                    val cancelarVentaUseCase = CancelarVentaUseCase(cuentaRepository)
-
-                    return HomeViewModel(app, abrirCuentaUseCase, cerrarCuentaUseCase, cancelarVentaUseCase, cuentaRepository, cuentaDAO) as T
-                }
-            }
         }
     }
 }

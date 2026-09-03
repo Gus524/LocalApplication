@@ -58,7 +58,6 @@ class ProductoViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeRepository: FakeProductoRepository
     private lateinit var registrarUseCase: RegistrarProductoUseCase
     private lateinit var actualizarPrecioUseCase: ActualizarPrecioProductoUseCase
@@ -67,11 +66,10 @@ class ProductoViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         fakeRepository = FakeProductoRepository()
-        registrarUseCase = RegistrarProductoUseCase(fakeRepository, testDispatcher)
-        actualizarPrecioUseCase = ActualizarPrecioProductoUseCase(fakeRepository, testDispatcher)
-        viewModel = ProductoViewModel(app, registrarUseCase, actualizarPrecioUseCase, fakeRepository)
+        registrarUseCase = RegistrarProductoUseCase(fakeRepository)
+        actualizarPrecioUseCase = ActualizarPrecioProductoUseCase(fakeRepository)
+        viewModel = ProductoViewModel(registrarUseCase, actualizarPrecioUseCase, fakeRepository)
     }
 
     @After

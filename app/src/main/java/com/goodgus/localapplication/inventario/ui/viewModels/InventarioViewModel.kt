@@ -1,23 +1,24 @@
 package com.goodgus.localapplication.inventario.ui.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
 import com.goodgus.localapplication.inventario.usecase.CambiarEstadoProductoParams
 import com.goodgus.localapplication.inventario.usecase.CambiarEstadoProductoUseCase
 import com.goodgus.localapplication.models.data.Producto
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class InventarioViewModel(
-    app: Application,
+@HiltViewModel
+class InventarioViewModel @Inject constructor(
     private val cambiarEstadoProductoUseCase: CambiarEstadoProductoUseCase,
     private val productoRepository: IProductoRepository
-): AndroidViewModel(app) {
+) : ViewModel() {
     data class InventarioUIState(
         val showDelete: Boolean = false,
         val idProducto: Int = 0,
@@ -101,21 +102,5 @@ class InventarioViewModel(
             tipo = domain.tipo,
             estado = if (domain.estaActivo) 1 else 2
         )
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val productoDAO = app.database.productoDao()
-                    val productoRepository = com.goodgus.localapplication.inventario.data.repository.ProductoRepository(productoDAO)
-                    val cambiarEstadoUseCase = CambiarEstadoProductoUseCase(productoRepository)
-
-                    return InventarioViewModel(app, cambiarEstadoUseCase, productoRepository) as T
-                }
-            }
-        }
     }
 }

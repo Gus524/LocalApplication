@@ -10,14 +10,16 @@ import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 
-class CuentaRepository(
+class CuentaRepository @Inject constructor(
     dao: CuentaDAO,
-    private val productoDao: ProductoDAO? = null,
-    private val cuentaMapper: CuentaMapper = CuentaMapper(),
+    private val productoDao: ProductoDAO,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseRepository<Cuenta, CuentaId, CuentaEntity, CuentaDAO>(dao, cuentaMapper, ioDispatcher),
+) : BaseRepository<Cuenta, CuentaId, CuentaEntity, CuentaDAO>(dao, CuentaMapper(), ioDispatcher),
     ICuentaRepository {
+
+    private val cuentaMapper = CuentaMapper()
 
     override suspend fun onHydrateQuery(id: CuentaId): CuentaEntity? {
         return dao.getCuentaById(id.valor)

@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.components
+package com.goodgus.localapplication.common.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api

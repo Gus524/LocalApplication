@@ -3,12 +3,11 @@ package com.goodgus.localapplication.core.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
-import com.goodgus.localapplication.components.AppButtonBar
+import com.goodgus.localapplication.common.components.AppButtonBar
 
 /**
  * Clase para generar los botones e iconos de la navegacion de pantallas principales

@@ -7,14 +7,15 @@ import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class CerrarCuentaParams(
     val cuentaId: Int
 )
 
-class CerrarCuentaUseCase(
-    private val cuentaRepository: ICuentaRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<CerrarCuentaParams, Cuenta>(dispatcher) {
+class CerrarCuentaUseCase @Inject constructor(
+    private val cuentaRepository: ICuentaRepository
+) : BaseUseCase<CerrarCuentaParams, Cuenta>() {
 
     override suspend fun ejecutar(params: CerrarCuentaParams): Result<Cuenta> {
         val cuentaId = CuentaId(params.cuentaId)

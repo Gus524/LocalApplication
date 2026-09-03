@@ -1,13 +1,13 @@
 package com.goodgus.localapplication.ventas.ui.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
 import com.goodgus.localapplication.models.data.Producto
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import com.goodgus.localapplication.ventas.usecase.RegistrarVentaParams
 import com.goodgus.localapplication.ventas.usecase.RegistrarVentaUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,13 +15,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class VentaViewModel(
-    app: Application,
+@HiltViewModel
+class VentaViewModel @Inject constructor(
     private val registrarVentaUseCase: RegistrarVentaUseCase,
     private val productoRepository: IProductoRepository,
     private val cuentaRepository: ICuentaRepository
-): AndroidViewModel(app) {
+) : ViewModel() {
     data class VentaUIState(
         val productoSeleccionado: Producto? = null,
         val cantidad: Int = 1,
@@ -180,23 +181,5 @@ class VentaViewModel(
             tipo = domain.tipo,
             estado = if (domain.estaActivo) 1 else 2
         )
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val productoDAO = app.database.productoDao()
-                    val cuentaDAO = app.database.cuentaDao()
-                    val productoRepository = com.goodgus.localapplication.inventario.data.repository.ProductoRepository(productoDAO)
-                    val cuentaRepository = com.goodgus.localapplication.ventas.data.repository.CuentaRepository(cuentaDAO, productoDAO)
-                    val registrarVentaUseCase = RegistrarVentaUseCase(cuentaRepository, productoRepository)
-
-                    return VentaViewModel(app, registrarVentaUseCase, productoRepository, cuentaRepository) as T
-                }
-            }
-        }
     }
 }

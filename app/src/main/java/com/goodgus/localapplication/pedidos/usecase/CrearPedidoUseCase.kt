@@ -9,6 +9,8 @@ import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class CrearPedidoParams(
     val descripcion: String,
     val detalles: String? = null,
@@ -16,10 +18,9 @@ data class CrearPedidoParams(
     val fechaEntrega: String? = null
 )
 
-class CrearPedidoUseCase(
-    private val pedidoRepository: IPedidoRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<CrearPedidoParams, Pedido>(dispatcher) {
+class CrearPedidoUseCase @Inject constructor(
+    private val pedidoRepository: IPedidoRepository
+) : BaseUseCase<CrearPedidoParams, Pedido>() {
 
     override suspend fun ejecutar(params: CrearPedidoParams): Result<Pedido> {
         val nuevoPedidoId = pedidoRepository.siguienteId()

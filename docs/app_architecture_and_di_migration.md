@@ -228,9 +228,9 @@ fun ProductoScreen(
 
 ## 4. Checklist para la Próxima Sesión
 
-- [ ] Añadir `@HiltAndroidApp` en `LocalApplication.kt` y `@AndroidEntryPoint` en `MainActivity.kt`.
-- [ ] Crear `common/di/DatabaseModule.kt`, `common/di/RepositoryModule.kt` y `common/di/DispatcherModule.kt`.
-- [ ] Agregar `@Inject constructor` a los Repositorios y Casos de Uso.
-- [ ] Refactorizar los 7 ViewModels para heredar de `ViewModel()`, añadir `@HiltViewModel` y eliminar los `companion object Factory`.
-- [ ] Actualizar las Vistas y `NavigationWrapper.kt` usando `hiltViewModel()` y `collectAsStateWithLifecycle()`.
-- [ ] Ejecutar `./gradlew testDebugUnitTest` y compilar el APK para verificar 100% de éxito.
+- [x] Añadir `@HiltAndroidApp` en `LocalApplication.kt` y `@AndroidEntryPoint` en `MainActivity.kt`.
+- [x] Crear `common/di/DatabaseModule.kt`, `common/di/RepositoryModule.kt` y `common/di/DispatcherModule.kt`.
+- [x] Agregar `@Inject constructor` a los Repositorios y Casos de Uso.
+- [x] Refactorizar los 7 ViewModels para heredar de `ViewModel()`, añadir `@HiltViewModel` y eliminar los `companion object Factory`.
+- [x] Actualizar las Vistas y `NavigationWrapper.kt` usando `hiltViewModel()` y `collectAsStateWithLifecycle()`.
+- [x] Ejecutar `./gradlew testDebugUnitTest` y compilar el APK para verificar 100% de éxito.

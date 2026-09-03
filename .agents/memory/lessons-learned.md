@@ -8,6 +8,8 @@ For any new domain module, feature, or phase:
 4. **Read-Only QA Audit:** Execute `domain_quality_auditor` subagent to grade purity, language fidelity, and test edge case coverage (`.agents/skills/ddd-code-quality-audit/SKILL.md`).
 
 ## 2. Core Architectural Invariants
+* **Mandatory Blueprint Gate Before Any Code Change:**
+  * Before creating, modifying, or refactoring any code files (DI, UI, ViewModels, UseCases, Repositories, Navigation), ALWAYS present a complete structured blueprint and wait for explicit user validation. Never apply code modifications directly without prior blueprint presentation and user confirmation.
 * **Ubiquitous Language & Nomenclature:**
   * Use pure Spanish business terms without noise/English words (e.g. `DetalleCompra`, `ProductoComprado`).
   * Universal domain primitives (like `Dinero` and `Cantidad`) reside in `common.domain` to be reused across bounded contexts (`compras`, `ventas`, `inventario`).

@@ -10,12 +10,12 @@ import com.goodgus.localapplication.pedidos.domain.model.PedidoId
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
 
-class PedidoRepository(
+class PedidoRepository @Inject constructor(
     dao: PedidosDAO,
-    mapper: IMapper<Pedido, PedidosEntity> = PedidoMapper(),
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : BaseRepository<Pedido, PedidoId, PedidosEntity, PedidosDAO>(dao, mapper, ioDispatcher),
+) : BaseRepository<Pedido, PedidoId, PedidosEntity, PedidosDAO>(dao, PedidoMapper(), ioDispatcher),
     IPedidoRepository {
 
     override suspend fun onHydrateQuery(id: PedidoId): PedidosEntity? {

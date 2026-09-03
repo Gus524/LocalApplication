@@ -82,7 +82,6 @@ class CompraViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeCompraRepository: FakeCompraRepository
     private lateinit var fakeProductoRepository: FakeProductoRepository
     private lateinit var registrarCompraUseCase: RegistrarCompraUseCase
@@ -92,7 +91,6 @@ class CompraViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         fakeCompraRepository = FakeCompraRepository()
         fakeProductoRepository = FakeProductoRepository()
 
@@ -104,10 +102,10 @@ class CompraViewModelTest {
             estado = EstadoProducto.ACTIVO
         )
 
-        registrarCompraUseCase = RegistrarCompraUseCase(fakeCompraRepository, fakeProductoRepository, testDispatcher)
-        cancelarCompraUseCase = CancelarCompraUseCase(fakeCompraRepository, testDispatcher)
+        registrarCompraUseCase = RegistrarCompraUseCase(fakeCompraRepository, fakeProductoRepository)
+        cancelarCompraUseCase = CancelarCompraUseCase(fakeCompraRepository)
 
-        viewModel = CompraViewModel(app, registrarCompraUseCase, cancelarCompraUseCase, fakeCompraRepository)
+        viewModel = CompraViewModel(registrarCompraUseCase, cancelarCompraUseCase, fakeCompraRepository)
     }
 
     @After

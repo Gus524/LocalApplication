@@ -7,14 +7,15 @@ import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class ConsultarPedidoParams(
     val id: Int
 )
 
-class ConsultarPedidoUseCase(
-    private val pedidoRepository: IPedidoRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<ConsultarPedidoParams, Pedido>(dispatcher) {
+class ConsultarPedidoUseCase @Inject constructor(
+    private val pedidoRepository: IPedidoRepository
+) : BaseUseCase<ConsultarPedidoParams, Pedido>() {
 
     override suspend fun ejecutar(params: ConsultarPedidoParams): Result<Pedido> {
         val pedidoId = PedidoId(params.id)

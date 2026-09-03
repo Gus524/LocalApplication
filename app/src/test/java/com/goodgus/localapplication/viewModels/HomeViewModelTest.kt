@@ -80,7 +80,6 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeCuentaRepository: FakeCuentaRepository
     private lateinit var cuentaDAO: CuentaDAO
     private lateinit var abrirCuentaUseCase: AbrirCuentaUseCase
@@ -91,16 +90,14 @@ class HomeViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         cuentaDAO = FakeCuentaDAO()
 
         fakeCuentaRepository = FakeCuentaRepository()
-        abrirCuentaUseCase = AbrirCuentaUseCase(fakeCuentaRepository, testDispatcher)
-        cerrarCuentaUseCase = CerrarCuentaUseCase(fakeCuentaRepository, testDispatcher)
-        cancelarVentaUseCase = CancelarVentaUseCase(fakeCuentaRepository, testDispatcher)
+        abrirCuentaUseCase = AbrirCuentaUseCase(fakeCuentaRepository)
+        cerrarCuentaUseCase = CerrarCuentaUseCase(fakeCuentaRepository)
+        cancelarVentaUseCase = CancelarVentaUseCase(fakeCuentaRepository)
 
         viewModel = HomeViewModel(
-            app,
             abrirCuentaUseCase,
             cerrarCuentaUseCase,
             cancelarVentaUseCase,

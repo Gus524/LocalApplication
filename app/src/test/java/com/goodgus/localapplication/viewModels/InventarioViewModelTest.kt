@@ -56,7 +56,6 @@ class InventarioViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeRepository: FakeProductoRepository
     private lateinit var cambiarEstadoUseCase: CambiarEstadoProductoUseCase
     private lateinit var viewModel: InventarioViewModel
@@ -64,9 +63,8 @@ class InventarioViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         fakeRepository = FakeProductoRepository()
-        cambiarEstadoUseCase = CambiarEstadoProductoUseCase(fakeRepository, testDispatcher)
+        cambiarEstadoUseCase = CambiarEstadoProductoUseCase(fakeRepository)
 
         fakeRepository.productos[1] = Producto(
             id = ProductoId(1),
@@ -83,7 +81,7 @@ class InventarioViewModelTest {
             estado = EstadoProducto.ACTIVO
         )
 
-        viewModel = InventarioViewModel(app, cambiarEstadoUseCase, fakeRepository)
+        viewModel = InventarioViewModel(cambiarEstadoUseCase, fakeRepository)
     }
 
     @After

@@ -19,14 +19,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.components.InfoCard
+import com.goodgus.localapplication.common.components.InfoCard
 import com.goodgus.localapplication.models.data.Pedidos
 import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun PedidoScreen(
     navigateToPedido: (String) -> Unit,
-    viewModel: PedidosViewModel
+    viewModel: PedidosViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pedidosState = viewModel.pedidos.collectAsState()

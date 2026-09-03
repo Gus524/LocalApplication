@@ -54,11 +54,11 @@ class PedidosUseCasesTest {
     @Before
     fun setup() {
         pedidoRepository = FakePedidoRepository()
-        crearPedidoUseCase = CrearPedidoUseCase(pedidoRepository, testDispatcher)
-        entregarPedidoUseCase = EntregarPedidoUseCase(pedidoRepository, testDispatcher)
-        cancelarPedidoUseCase = CancelarPedidoUseCase(pedidoRepository, testDispatcher)
-        editarPedidoUseCase = EditarPedidoUseCase(pedidoRepository, testDispatcher)
-        consultarPedidoUseCase = ConsultarPedidoUseCase(pedidoRepository, testDispatcher)
+        crearPedidoUseCase = CrearPedidoUseCase(pedidoRepository)
+        entregarPedidoUseCase = EntregarPedidoUseCase(pedidoRepository)
+        cancelarPedidoUseCase = CancelarPedidoUseCase(pedidoRepository)
+        editarPedidoUseCase = EditarPedidoUseCase(pedidoRepository)
+        consultarPedidoUseCase = ConsultarPedidoUseCase(pedidoRepository)
     }
 
     @Test

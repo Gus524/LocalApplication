@@ -36,16 +36,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.components.InfoCard
-import com.goodgus.localapplication.components.ShowAlert
+import com.goodgus.localapplication.common.components.InfoCard
+import com.goodgus.localapplication.common.components.ShowAlert
 import com.goodgus.localapplication.models.dataView.GetCuenta
 import com.goodgus.localapplication.viewModels.HomeViewModel
-
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun HomeScreen(
     navigateToVenta: (String) -> Unit,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val cuentaActivaState: State<List<GetCuenta>> = viewModel.cuenta.collectAsState()
     val cuentaActiva = cuentaActivaState.value

@@ -12,15 +12,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.components.BotonesAcciones
-import com.goodgus.localapplication.components.CampoText
+import com.goodgus.localapplication.common.components.BotonesAcciones
+import com.goodgus.localapplication.common.components.CampoText
 import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun EditPedidoScreen(
     idPedido: String? = null,
     navigateBack: () -> Unit,
-    viewModel: EditPedidoViewModel
+    viewModel: EditPedidoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

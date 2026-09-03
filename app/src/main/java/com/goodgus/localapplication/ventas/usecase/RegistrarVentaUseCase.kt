@@ -12,6 +12,8 @@ import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class RegistrarVentaParams(
     val cuentaId: Int,
     val productoId: Int,
@@ -20,11 +22,10 @@ data class RegistrarVentaParams(
     val precioPersonalizado: Double? = null
 )
 
-class RegistrarVentaUseCase(
+class RegistrarVentaUseCase @Inject constructor(
     private val cuentaRepository: ICuentaRepository,
-    private val productoRepository: IProductoRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<RegistrarVentaParams, Cuenta>(dispatcher) {
+    private val productoRepository: IProductoRepository
+) : BaseUseCase<RegistrarVentaParams, Cuenta>() {
 
     override suspend fun ejecutar(params: RegistrarVentaParams): Result<Cuenta> {
         val cuentaId = CuentaId(params.cuentaId)

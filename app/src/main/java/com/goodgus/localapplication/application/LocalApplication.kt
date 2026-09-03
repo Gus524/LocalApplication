@@ -2,13 +2,13 @@ package com.goodgus.localapplication.application
 
 import android.app.Application
 import com.goodgus.localapplication.DAO.AppDataBase
+import dagger.hilt.android.HiltAndroidApp
 
 /*
- * Funcion que inicializa la base de datos con patron singleton
- *
+ * Inicialización de la aplicación con Hilt
  */
-
-class LocalApplication: Application() {
+@HiltAndroidApp
+class LocalApplication : Application() {
     val database: AppDataBase by lazy {
         AppDataBase.getInstance(this)
     }

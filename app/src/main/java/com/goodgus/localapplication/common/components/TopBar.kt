@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.components
+package com.goodgus.localapplication.common.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

@@ -13,17 +13,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.components.BotonesAcciones
-import com.goodgus.localapplication.components.CampoCantidad
-import com.goodgus.localapplication.components.CampoPrecio
-import com.goodgus.localapplication.components.CampoText
+import com.goodgus.localapplication.common.components.BotonesAcciones
+import com.goodgus.localapplication.common.components.CampoCantidad
+import com.goodgus.localapplication.common.components.CampoPrecio
+import com.goodgus.localapplication.common.components.CampoText
 import com.goodgus.localapplication.inventario.ui.viewModels.ProductoViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ProductoScreen(
     idProducto: String? = null,
     navigateBack: () -> Unit,
-    viewModel: ProductoViewModel
+    viewModel: ProductoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

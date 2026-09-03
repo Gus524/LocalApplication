@@ -1,12 +1,12 @@
 package com.goodgus.localapplication.pedidos.ui.viewModels
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.pedidos.domain.model.PedidoId
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
 import com.goodgus.localapplication.pedidos.usecase.CrearPedidoParams
 import com.goodgus.localapplication.pedidos.usecase.CrearPedidoUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,12 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class EditPedidoViewModel(
-    app: Application,
+@HiltViewModel
+class EditPedidoViewModel @Inject constructor(
     private val crearPedidoUseCase: CrearPedidoUseCase,
     private val pedidoRepository: IPedidoRepository
-): AndroidViewModel(app) {
+) : ViewModel() {
     data class PedidoUIState(
         val cantidad: Int = 0,
         val descripcion: String = "",
@@ -93,22 +94,6 @@ class EditPedidoViewModel(
                 }
             } else {
                 _uiState.update { it.copy(isBusy = false, mensaje = "Pedido no encontrado") }
-            }
-        }
-    }
-
-    companion object {
-        fun Factory(application: Application): androidx.lifecycle.ViewModelProvider.Factory {
-            return object : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(application) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    val app = application as com.goodgus.localapplication.application.LocalApplication
-                    val pedidosDAO = app.database.pedidosDAO()
-                    val pedidoRepository = com.goodgus.localapplication.pedidos.data.repository.PedidoRepository(pedidosDAO)
-                    val crearPedidoUseCase = CrearPedidoUseCase(pedidoRepository)
-
-                    return EditPedidoViewModel(app, crearPedidoUseCase, pedidoRepository) as T
-                }
             }
         }
     }

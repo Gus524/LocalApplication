@@ -8,14 +8,15 @@ import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class AbrirCuentaParams(
     val fecha: String
 )
 
-class AbrirCuentaUseCase(
-    private val cuentaRepository: ICuentaRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<AbrirCuentaParams, Cuenta>(dispatcher) {
+class AbrirCuentaUseCase @Inject constructor(
+    private val cuentaRepository: ICuentaRepository
+) : BaseUseCase<AbrirCuentaParams, Cuenta>() {
 
     override suspend fun ejecutar(params: AbrirCuentaParams): Result<Cuenta> {
         val cuentaActiva = cuentaRepository.obtenerCuentaActiva()

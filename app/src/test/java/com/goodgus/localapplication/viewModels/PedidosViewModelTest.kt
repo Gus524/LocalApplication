@@ -51,14 +51,12 @@ class PedidosViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeRepository: FakePedidoRepository
     private lateinit var viewModel: PedidosViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         fakeRepository = FakePedidoRepository()
 
         fakeRepository.pedidos[1] = Pedido(
@@ -68,7 +66,7 @@ class PedidosViewModelTest {
             estado = EstadoPedido.PENDIENTE
         )
 
-        viewModel = PedidosViewModel(app, fakeRepository)
+        viewModel = PedidosViewModel(fakeRepository)
     }
 
     @After

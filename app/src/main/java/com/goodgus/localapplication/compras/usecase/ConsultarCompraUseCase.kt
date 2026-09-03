@@ -7,14 +7,15 @@ import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
+import javax.inject.Inject
+
 data class ConsultarCompraParams(
     val id: Int
 )
 
-class ConsultarCompraUseCase(
-    private val compraRepository: ICompraRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
-) : BaseUseCase<ConsultarCompraParams, Compra>(dispatcher) {
+class ConsultarCompraUseCase @Inject constructor(
+    private val compraRepository: ICompraRepository
+) : BaseUseCase<ConsultarCompraParams, Compra>() {
 
     override suspend fun ejecutar(params: ConsultarCompraParams): Result<Compra> {
         val compraId = CompraId(params.id)

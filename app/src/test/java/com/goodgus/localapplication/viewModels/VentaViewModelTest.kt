@@ -81,7 +81,6 @@ class VentaViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var app: Application
     private lateinit var fakeProductoRepository: FakeProductoRepository
     private lateinit var fakeCuentaRepository: FakeCuentaRepository
     private lateinit var registrarVentaUseCase: RegistrarVentaUseCase
@@ -90,10 +89,9 @@ class VentaViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        app = TestApp()
         fakeProductoRepository = FakeProductoRepository()
         fakeCuentaRepository = FakeCuentaRepository()
-        registrarVentaUseCase = RegistrarVentaUseCase(fakeCuentaRepository, fakeProductoRepository, testDispatcher)
+        registrarVentaUseCase = RegistrarVentaUseCase(fakeCuentaRepository, fakeProductoRepository)
 
         fakeProductoRepository.productos[1] = Producto(
             id = ProductoId(1),
@@ -108,7 +106,7 @@ class VentaViewModelTest {
             informacion = InformacionCuenta("2026-09-03", EstadoCuenta.ABIERTA)
         )
 
-        viewModel = VentaViewModel(app, registrarVentaUseCase, fakeProductoRepository, fakeCuentaRepository)
+        viewModel = VentaViewModel(registrarVentaUseCase, fakeProductoRepository, fakeCuentaRepository)
     }
 
     @After
