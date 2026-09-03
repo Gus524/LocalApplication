@@ -7,20 +7,19 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Clase para establecer las caracteristicas de nuestros modelos  (tablas) de Room
- * Se establece la primary key y las columnas, estableciendo si pueden ser NULL o sus valores DEFAULT
- * Deben ser igual a las tablas de SQLite (si es que hay una base de datos generada previamente
- *
- * Se establecen los modelos de Compra y CompraProducto
+ * Entidades de persistencia Room para las tablas Compra y Compra_Producto.
+ * Desacopladas de los agregados y entidades de dominio puro.
  */
 
-
 @Entity(tableName = "Compra")
-class Compra (
+data class Compra(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id_compra") val idCompra: Int,
-    @ColumnInfo(name = "total_compra", defaultValue = "0") val totalCompra: Double?,
-    @ColumnInfo(name = "fecha_compra", defaultValue = "(strftime('%Y-%m-%d', 'now'))") val fechaCompra: String?
+    @ColumnInfo(name = "id_compra")
+    val idCompra: Int = 0,
+    @ColumnInfo(name = "total_compra", defaultValue = "0")
+    val totalCompra: Double = 0.0,
+    @ColumnInfo(name = "fecha_compra", defaultValue = "(strftime('%Y-%m-%d', 'now'))")
+    val fechaCompra: String = ""
 )
 
 @Entity(
@@ -42,11 +41,16 @@ class Compra (
         Index(value = ["id_producto"])
     ]
 )
-class CompraProducto (
+data class CompraProducto(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id_compra_producto") val idCompraProducto: Int?,
-    @ColumnInfo(name = "parcial_compra") val parcialCompra: Double,
-    @ColumnInfo(name = "cantidad_producto", defaultValue = "1") val cantidadProducto: Int?,
-    @ColumnInfo(name = "id_compra") val idCompra: Int,
-    @ColumnInfo(name = "id_producto") val idProducto: Int
+    @ColumnInfo(name = "id_compra_producto")
+    val idCompraProducto: Int = 0,
+    @ColumnInfo(name = "parcial_compra")
+    val parcialCompra: Double = 0.0,
+    @ColumnInfo(name = "cantidad_producto", defaultValue = "1")
+    val cantidadProducto: Int = 1,
+    @ColumnInfo(name = "id_compra")
+    val idCompra: Int = 0,
+    @ColumnInfo(name = "id_producto")
+    val idProducto: Int = 0
 )
