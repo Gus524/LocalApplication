@@ -2,7 +2,7 @@ package com.goodgus.localapplication.compras.data.repository
 
 import com.goodgus.localapplication.DAO.CompraDAO
 import com.goodgus.localapplication.DAO.ProductoDAO
-import com.goodgus.localapplication.common.data.repository.BaseRepository
+import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.compras.data.mapper.CompraMapper
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.CompraId

@@ -1,8 +1,8 @@
 package com.goodgus.localapplication.ventas.usecase
 
-import com.goodgus.localapplication.common.domain.CuentaCerradaException
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.domain.StockInsuficienteException
+import com.goodgus.localapplication.core.domain.CuentaCerradaException
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.domain.StockInsuficienteException
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario
@@ -13,7 +13,6 @@ import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.model.EstadoCuenta
 import com.goodgus.localapplication.ventas.domain.model.EstadoVenta
-import com.goodgus.localapplication.ventas.domain.model.InformacionCuenta
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

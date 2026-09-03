@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.pedidos.usecase
 
-import com.goodgus.localapplication.common.domain.PedidoYaFinalizadoException
+import com.goodgus.localapplication.core.domain.PedidoYaFinalizadoException
 import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.model.PedidoId
@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test

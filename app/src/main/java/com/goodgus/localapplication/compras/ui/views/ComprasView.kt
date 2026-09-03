@@ -30,7 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.common.components.InfoCard
+import com.goodgus.localapplication.shared.components.InfoCard
 import com.goodgus.localapplication.models.data.Compra
 import com.goodgus.localapplication.compras.ui.viewModels.CompraViewModel
 import androidx.hilt.navigation.compose.hiltViewModel

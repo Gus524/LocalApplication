@@ -1,7 +1,7 @@
 package com.goodgus.localapplication.ventas.domain.model
 
-import com.goodgus.localapplication.common.domain.Cantidad
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.Dinero
 
 /**
  * Value Object que encapsula los detalles de la transacción de venta.

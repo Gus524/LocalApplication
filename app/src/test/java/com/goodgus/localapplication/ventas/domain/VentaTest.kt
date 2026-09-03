@@ -1,14 +1,13 @@
 package com.goodgus.localapplication.ventas.domain
 
-import com.goodgus.localapplication.common.domain.Cantidad
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.ventas.domain.model.DetalleVenta
 import com.goodgus.localapplication.ventas.domain.model.EstadoVenta
 import com.goodgus.localapplication.ventas.domain.model.Venta
 import com.goodgus.localapplication.ventas.domain.model.VentaId
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class VentaTest {

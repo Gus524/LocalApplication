@@ -1,39 +1,52 @@
 package com.goodgus.localapplication.core.navigation
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 /**
- * Objetos los cuales forman parte de la navegacion de nuestra aplicacion
- * Son las pantallas con sus rutas y titulos
- *
- * Algunas llevan parametros para mostrar pantallas con datos especificos
- * TODO revisar para implementarlo como data object o data class, es decir que todas sean del mismo tipo
+ * Contrato base para todas las rutas y pantallas de la aplicación.
+ * Cada destino es serializable e implementa [AppRoute] garantizando tipado estático y robustez.
  */
+sealed interface AppRoute : NavKey {
+    val title: String
 
-@Serializable
-data object Home : Ruta("Home", "Cuenta")
+    @Serializable
+    data object Home : AppRoute {
+        override val title: String = "Cuenta"
+    }
 
-@Serializable
-data object Inventario : Ruta("Inventario", "Inventario")
+    @Serializable
+    data object Inventario : AppRoute {
+        override val title: String = "Inventario"
+    }
 
-@Serializable
-data object Compras : Ruta("Compras", "Compras")
+    @Serializable
+    data object Pedidos : AppRoute {
+        override val title: String = "Pedidos"
+    }
 
-@Serializable
-data object Pedidos : Ruta("Pedidos", "Pedidos")
+    @Serializable
+    data object Compras : AppRoute {
+        override val title: String = "Compras"
+    }
 
-@Serializable
-data class Venta(val idVenta: String?) : Ruta("Venta", "Venta")
+    @Serializable
+    data class Venta(val idVenta: String? = null) : AppRoute {
+        override val title: String = if (idVenta != null) "Actualizar Venta" else "Nueva Venta"
+    }
 
-@Serializable
-data class Producto(val idProducto: String?)
+    @Serializable
+    data class Producto(val idProducto: String? = null) : AppRoute {
+        override val title: String = if (idProducto != null) "Editar Producto" else "Nuevo Producto"
+    }
 
-@Serializable
-data class EditPedido(val idPedido: String?)
+    @Serializable
+    data class EditPedido(val idPedido: String? = null) : AppRoute {
+        override val title: String = if (idPedido != null) "Editar Pedido" else "Nuevo Pedido"
+    }
 
-@Serializable
-data class CompraProducto(val idCompra: String)
-
-// Agregamos una clase sellada para facilitar la implementacion de destinos y propiedades
-@Serializable
-sealed class Ruta(val ruta: String, val title: String)
+    @Serializable
+    data class CompraProducto(val idCompra: String) : AppRoute {
+        override val title: String = "Detalle Compra"
+    }
+}

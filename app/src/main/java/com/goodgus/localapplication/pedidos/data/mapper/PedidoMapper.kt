@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.pedidos.data.mapper
 
-import com.goodgus.localapplication.common.data.mapper.IMapper
+import com.goodgus.localapplication.core.data.mapper.IMapper
 import com.goodgus.localapplication.models.data.Pedidos as PedidosEntity
 import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.InformacionPedido

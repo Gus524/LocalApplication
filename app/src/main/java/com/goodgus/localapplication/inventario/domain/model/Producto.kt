@@ -1,9 +1,9 @@
 package com.goodgus.localapplication.inventario.domain.model
 
-import com.goodgus.localapplication.common.domain.AggregateRoot
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.domain.ProductoInactivoException
-import com.goodgus.localapplication.common.domain.StockInsuficienteException
+import com.goodgus.localapplication.core.domain.AggregateRoot
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.domain.ProductoInactivoException
+import com.goodgus.localapplication.core.domain.StockInsuficienteException
 
 /**
  * Raíz de Agregado (Aggregate Root) del Bounded Context de Inventario.

@@ -13,11 +13,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.common.components.BotonesAcciones
-import com.goodgus.localapplication.common.components.CampoCantidad
-import com.goodgus.localapplication.common.components.CampoPrecio
-import com.goodgus.localapplication.common.components.CampoTitle
-import com.goodgus.localapplication.common.components.SearchProduct
+import com.goodgus.localapplication.shared.components.BotonesAcciones
+import com.goodgus.localapplication.shared.components.CampoCantidad
+import com.goodgus.localapplication.shared.components.CampoPrecio
+import com.goodgus.localapplication.shared.components.CampoTitle
+import com.goodgus.localapplication.shared.components.SearchProduct
 import com.goodgus.localapplication.ventas.ui.viewModels.VentaViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 

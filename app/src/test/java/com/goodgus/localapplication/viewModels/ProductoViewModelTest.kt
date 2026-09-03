@@ -1,7 +1,7 @@
 package com.goodgus.localapplication.viewModels
 
 import android.app.Application
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario

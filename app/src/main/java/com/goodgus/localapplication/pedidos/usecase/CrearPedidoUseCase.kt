@@ -1,13 +1,11 @@
 package com.goodgus.localapplication.pedidos.usecase
 
-import com.goodgus.localapplication.common.usecase.BaseUseCase
+import com.goodgus.localapplication.core.usecase.BaseUseCase
 import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.InformacionPedido
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.model.PlazoEntrega
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 
 import javax.inject.Inject
 

@@ -1,7 +1,7 @@
 package com.goodgus.localapplication.inventario.data.mapper
 
-import com.goodgus.localapplication.common.data.mapper.IMapper
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.data.mapper.IMapper
+import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario

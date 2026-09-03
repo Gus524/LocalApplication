@@ -1,10 +1,10 @@
 package com.goodgus.localapplication.compras.domain.model
 
-import com.goodgus.localapplication.common.domain.AggregateRoot
-import com.goodgus.localapplication.common.domain.Cantidad
-import com.goodgus.localapplication.common.domain.CompraYaFinalizadaException
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.domain.ProductoInactivoException
+import com.goodgus.localapplication.core.domain.AggregateRoot
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.CompraYaFinalizadaException
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.domain.ProductoInactivoException
 import com.goodgus.localapplication.inventario.domain.model.Producto
 
 /**

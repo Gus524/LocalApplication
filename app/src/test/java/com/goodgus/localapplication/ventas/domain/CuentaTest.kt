@@ -1,10 +1,10 @@
 package com.goodgus.localapplication.ventas.domain
 
-import com.goodgus.localapplication.common.domain.Cantidad
-import com.goodgus.localapplication.common.domain.CuentaCerradaException
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.domain.StockInsuficienteException
-import com.goodgus.localapplication.common.domain.VentaNoEncontradaException
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.CuentaCerradaException
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.domain.StockInsuficienteException
+import com.goodgus.localapplication.core.domain.VentaNoEncontradaException
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario
@@ -18,7 +18,6 @@ import com.goodgus.localapplication.ventas.domain.model.InformacionCuenta
 import com.goodgus.localapplication.ventas.domain.model.VentaId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

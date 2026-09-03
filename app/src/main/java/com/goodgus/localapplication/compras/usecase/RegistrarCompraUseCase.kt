@@ -1,8 +1,8 @@
 package com.goodgus.localapplication.compras.usecase
 
-import com.goodgus.localapplication.common.domain.Cantidad
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.usecase.BaseUseCase
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.usecase.BaseUseCase
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.EstadoCompra
 import com.goodgus.localapplication.compras.domain.model.InformacionCompra
@@ -11,8 +11,6 @@ import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 
 import javax.inject.Inject
 

@@ -1,116 +1,132 @@
 package com.goodgus.localapplication.core.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import com.goodgus.localapplication.common.components.AppScaffold
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.goodgus.localapplication.shared.components.AppScaffold
 import com.goodgus.localapplication.compras.ui.views.CompraScreen
 import com.goodgus.localapplication.inventario.ui.views.InventarioScreen
 import com.goodgus.localapplication.inventario.ui.views.ProductoScreen
 import com.goodgus.localapplication.pedidos.ui.views.EditPedidoScreen
 import com.goodgus.localapplication.pedidos.ui.views.PedidoScreen
-import com.goodgus.localapplication.utilidades.extractRuta
-import com.goodgus.localapplication.utilidades.getTitle
 import com.goodgus.localapplication.ventas.ui.views.VentaScreen
-import com.goodgus.localapplication.views.HomeScreen
+import com.goodgus.localapplication.ventas.ui.views.HomeScreen
 
 /**
- * Composable encargado de la navegacion de toda nuestra aplicacion
+ * Composable encargado de la navegación de toda la aplicación utilizando Navigation 3.
  */
-
 @Composable
 fun NavigationWrapper() {
-    val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute: String = extractRuta(backStackEntry?.destination?.route) ?: Home.ruta
+    val backStack = rememberNavBackStack(AppRoute.Home)
+    val currentRoute: AppRoute = (backStack.lastOrNull() as? AppRoute) ?: AppRoute.Home
+
+
+    val onNavigateToTab: (AppRoute) -> Unit = { targetRoute ->
+        // Swap de raíz para pestañas principales
+        while (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+        backStack[0] = targetRoute
+    }
 
     AppScaffold(
         currentRoute = currentRoute,
-        navController = navController,
-        searchText = "",
-        onTextChange = { },
-        showSearch = false,
-        title = getTitle(currentRoute),
-        content = { padding ->
-            NavHost(
-                navController = navController,
-                startDestination = Home,
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-            ) {
-                composable<Home> {
+        onTabSelected = onNavigateToTab
+    ) { padding ->
+        NavDisplay(
+            backStack = backStack,
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            entryProvider = entryProvider {
+                entry<AppRoute.Home> {
                     HomeScreen(
-                        navigateToVenta = { idVenta -> navController.navigate(Venta(idVenta = idVenta)) }
+                        navigateToVenta = { idVenta ->
+                            backStack.add(AppRoute.Venta(idVenta = idVenta))
+                        }
                     )
                 }
-                composable<Inventario> {
+                entry<AppRoute.Inventario> {
                     InventarioScreen(
-                        navigateToProducto = { idProducto -> navController.navigate(Producto(idProducto = idProducto)) }
+                        navigateToProducto = { idProducto ->
+                            backStack.add(AppRoute.Producto(idProducto = idProducto))
+                        }
                     )
                 }
-                composable<Pedidos> {
+                entry<AppRoute.Pedidos> {
                     PedidoScreen(
-                        navigateToPedido = { navController.navigate(EditPedido("")) }
+                        navigateToPedido = {
+                            backStack.add(AppRoute.EditPedido())
+                        }
                     )
                 }
-                composable<Compras> {
+                entry<AppRoute.Compras> {
                     CompraScreen(
-                        navigateToDetalle = { idCompra -> navController.navigate(CompraProducto(idCompra = idCompra)) }
+                        navigateToDetalle = { idCompra ->
+                            backStack.add(AppRoute.CompraProducto(idCompra = idCompra))
+                        }
                     )
                 }
-                composable<Venta> { entry ->
-                    val venta = entry.toRoute<Venta>()
+                entry<AppRoute.Venta> { ventaKey ->
                     VentaScreen(
-                        idVenta = venta.idVenta,
+                        idVenta = ventaKey.idVenta,
                         navigateBack = {
-                            navController.navigate(Home) {
-                                popUpTo<Home>()
-                            }
+                            backStack.removeLastOrNull()
                         }
                     )
                 }
-                composable<Producto> { entry ->
-                    val producto = entry.toRoute<Producto>()
+                entry<AppRoute.Producto> { productoKey ->
                     ProductoScreen(
-                        idProducto = producto.idProducto,
+                        idProducto = productoKey.idProducto,
                         navigateBack = {
-                            navController.navigate(Inventario) {
-                                popUpTo<Inventario>()
-                            }
+                            backStack.removeLastOrNull()
                         }
                     )
                 }
-                composable<EditPedido> { entry ->
-                    val pedido = entry.toRoute<EditPedido>()
+                entry<AppRoute.EditPedido> { pedidoKey ->
                     EditPedidoScreen(
-                        idPedido = pedido.idPedido,
+                        idPedido = pedidoKey.idPedido,
                         navigateBack = {
-                            navController.navigate(Pedidos) {
-                                popUpTo<Pedidos>()
-                            }
+                            backStack.removeLastOrNull()
                         }
                     )
                 }
+            },
+            transitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(250)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(250)
+                )
+            },
+            popTransitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(250)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(250)
+                )
+            },
+            predictivePopTransitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(250)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(250)
+                )
             }
-        }
-    )
+        )
+    }
 }
-
-/**
- * Lista de pantallas en las cuales se mostrara el navigationBar
- */
-
-val navigationBarScreens = listOf(
-    Home.ruta,
-    Inventario.ruta,
-    Pedidos.ruta
-//    Compras.ruta
-)

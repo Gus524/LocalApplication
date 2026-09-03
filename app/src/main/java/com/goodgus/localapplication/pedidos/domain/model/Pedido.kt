@@ -1,7 +1,7 @@
 package com.goodgus.localapplication.pedidos.domain.model
 
-import com.goodgus.localapplication.common.domain.AggregateRoot
-import com.goodgus.localapplication.common.domain.PedidoYaFinalizadoException
+import com.goodgus.localapplication.core.domain.AggregateRoot
+import com.goodgus.localapplication.core.domain.PedidoYaFinalizadoException
 
 /**
  * Raíz de Agregado (Aggregate Root) del Bounded Context de Pedidos.

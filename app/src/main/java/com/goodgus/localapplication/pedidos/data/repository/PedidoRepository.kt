@@ -1,8 +1,7 @@
 package com.goodgus.localapplication.pedidos.data.repository
 
 import com.goodgus.localapplication.DAO.PedidosDAO
-import com.goodgus.localapplication.common.data.mapper.IMapper
-import com.goodgus.localapplication.common.data.repository.BaseRepository
+import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.models.data.Pedidos as PedidosEntity
 import com.goodgus.localapplication.pedidos.data.mapper.PedidoMapper
 import com.goodgus.localapplication.pedidos.domain.model.Pedido

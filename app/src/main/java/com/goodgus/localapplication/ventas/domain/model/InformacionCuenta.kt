@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.ventas.domain.model
 
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.domain.Dinero
 
 /**
  * Value Object que actúa como snapshot del encabezado y balance acumulado de la cuenta.

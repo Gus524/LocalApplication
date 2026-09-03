@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.compras.domain.model
 
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.domain.Dinero
 
 /**
  * Value Object inmutable que agrupa los metadatos generales de una compra.

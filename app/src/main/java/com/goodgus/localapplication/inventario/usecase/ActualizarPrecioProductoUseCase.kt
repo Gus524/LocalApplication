@@ -1,12 +1,10 @@
 package com.goodgus.localapplication.inventario.usecase
 
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.usecase.BaseUseCase
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.usecase.BaseUseCase
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 
 import javax.inject.Inject
 

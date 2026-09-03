@@ -2,7 +2,7 @@ package com.goodgus.localapplication.ventas.data.repository
 
 import com.goodgus.localapplication.DAO.CuentaDAO
 import com.goodgus.localapplication.DAO.ProductoDAO
-import com.goodgus.localapplication.common.data.repository.BaseRepository
+import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.models.data.Cuenta as CuentaEntity
 import com.goodgus.localapplication.ventas.data.mapper.CuentaMapper
 import com.goodgus.localapplication.ventas.domain.model.Cuenta

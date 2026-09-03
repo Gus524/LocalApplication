@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.ventas.domain.repository
 
-import com.goodgus.localapplication.common.domain.IRepository
+import com.goodgus.localapplication.core.domain.IRepository
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 

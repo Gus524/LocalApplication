@@ -1,8 +1,7 @@
 package com.goodgus.localapplication.compras.usecase
 
-import com.goodgus.localapplication.common.domain.CompraYaFinalizadaException
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.domain.ProductoInactivoException
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.domain.ProductoInactivoException
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.CompraId
 import com.goodgus.localapplication.compras.domain.model.EstadoCompra

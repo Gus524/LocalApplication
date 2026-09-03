@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.inventario.domain.repository
 
-import com.goodgus.localapplication.common.domain.IRepository
+import com.goodgus.localapplication.core.domain.IRepository
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 

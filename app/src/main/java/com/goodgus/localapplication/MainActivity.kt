@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.goodgus.localapplication.core.navigation.NavigationWrapper
-import com.goodgus.localapplication.ui.theme.LocalApplicationTheme
+import com.goodgus.localapplication.core.theme.LocalApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -1,8 +1,8 @@
 package com.goodgus.localapplication.compras.data.mapper
 
-import com.goodgus.localapplication.common.data.mapper.IMapper
-import com.goodgus.localapplication.common.domain.Cantidad
-import com.goodgus.localapplication.common.domain.Dinero
+import com.goodgus.localapplication.core.data.mapper.IMapper
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.CompraId
 import com.goodgus.localapplication.compras.domain.model.DetalleCompra

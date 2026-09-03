@@ -32,8 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.common.components.InfoCard
-import com.goodgus.localapplication.common.components.ShowAlert
+import com.goodgus.localapplication.shared.components.InfoCard
+import com.goodgus.localapplication.shared.components.ShowAlert
 import com.goodgus.localapplication.models.data.Producto
 import com.goodgus.localapplication.inventario.ui.viewModels.InventarioViewModel
 import androidx.hilt.navigation.compose.hiltViewModel

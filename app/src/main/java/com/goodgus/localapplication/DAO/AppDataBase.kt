@@ -12,7 +12,6 @@ import com.goodgus.localapplication.models.data.Pedidos
 import com.goodgus.localapplication.models.data.Producto
 import com.goodgus.localapplication.models.data.Venta
 import com.goodgus.localapplication.models.dataView.GetCuenta
-import com.goodgus.localapplication.utilidades.Converters
 
 /**
  * Objeto para establecer la estructura de la base de datos, se declaran las tablas, las vistas y la version
@@ -23,10 +22,6 @@ import com.goodgus.localapplication.utilidades.Converters
     views = [GetCuenta::class],
     version = 1,
     exportSchema = false
-)
-
-@TypeConverters(
-    Converters::class
 )
 
 /**

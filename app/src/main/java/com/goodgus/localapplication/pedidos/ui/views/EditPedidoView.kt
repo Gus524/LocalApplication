@@ -12,8 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.common.components.BotonesAcciones
-import com.goodgus.localapplication.common.components.CampoText
+import com.goodgus.localapplication.shared.components.BotonesAcciones
+import com.goodgus.localapplication.shared.components.CampoText
 import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 

@@ -1,11 +1,9 @@
 package com.goodgus.localapplication.ventas.usecase
 
-import com.goodgus.localapplication.common.usecase.BaseUseCase
+import com.goodgus.localapplication.core.usecase.BaseUseCase
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 
 import javax.inject.Inject
 

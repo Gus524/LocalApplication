@@ -3,20 +3,19 @@ package com.goodgus.localapplication.core.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavController
-import com.goodgus.localapplication.common.components.AppButtonBar
+import com.goodgus.localapplication.shared.components.AppButtonBar
 
 /**
  * Clase para generar los botones e iconos de la navegacion de pantallas principales
  *
- * Se debe asignar la ruta, el icono y el texto
+ * Se debe asignar la ruta tipada [AppRoute], el icono y el texto
  */
-
 data class NavigationItem(
-    val route: Ruta,
+    val route: AppRoute,
     val icon: ImageVector,
     val label: String
 )
@@ -24,26 +23,26 @@ data class NavigationItem(
 /**
  * Composable para mostrar los iconos de las pantallas principales
  *
- * @param navController El controlador de la navegacion
- * @param currentRoute La ruta actual (pantalla actual) de la aplicacion
+ * @param currentRoute La ruta actual tipada [AppRoute] de la aplicacion
+ * @param onTabSelected Callback invocado al seleccionar una pestaña
  */
-
 @Composable
 fun AppNavigation(
-    navController: NavController,
-    currentRoute: String
-    ) {
+    currentRoute: AppRoute,
+    onTabSelected: (AppRoute) -> Unit
+) {
     val items = listOf(
-        NavigationItem(Home, Icons.Filled.Home, "Cuenta"),
-        NavigationItem(Inventario, Icons.AutoMirrored.Filled.List, "Inventario"),
-        NavigationItem(Pedidos, Icons.Filled.Star, "Pedidos")
-//        NavigationItem(Compras, Icons.Filled.ShoppingCart, "Compras")
+        NavigationItem(AppRoute.Home, Icons.Filled.Home, "Cuenta"),
+        NavigationItem(AppRoute.Inventario, Icons.AutoMirrored.Filled.List, "Inventario"),
+        NavigationItem(AppRoute.Pedidos, Icons.Filled.Star, "Pedidos"),
+        NavigationItem(AppRoute.Compras, Icons.Filled.ShoppingCart, "Compras")
     )
 
     AppButtonBar(
         items = items,
         current = currentRoute,
-        navController = navController
+        onTabSelected = onTabSelected
     )
 }
+
 

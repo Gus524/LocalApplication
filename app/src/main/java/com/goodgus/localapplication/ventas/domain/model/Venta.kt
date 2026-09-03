@@ -1,7 +1,7 @@
 package com.goodgus.localapplication.ventas.domain.model
 
-import com.goodgus.localapplication.common.domain.Dinero
-import com.goodgus.localapplication.common.domain.Entity
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.domain.Entity
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 
 /**

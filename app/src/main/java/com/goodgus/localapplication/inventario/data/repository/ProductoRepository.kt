@@ -1,8 +1,7 @@
 package com.goodgus.localapplication.inventario.data.repository
 
 import com.goodgus.localapplication.DAO.ProductoDAO
-import com.goodgus.localapplication.common.data.mapper.IMapper
-import com.goodgus.localapplication.common.data.repository.BaseRepository
+import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.inventario.data.mapper.ProductoMapper
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId

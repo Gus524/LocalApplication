@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.pedidos.domain
 
-import com.goodgus.localapplication.common.domain.PedidoYaFinalizadoException
+import com.goodgus.localapplication.core.domain.PedidoYaFinalizadoException
 import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.InformacionPedido
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
@@ -8,7 +8,6 @@ import com.goodgus.localapplication.pedidos.domain.model.PedidoId
 import com.goodgus.localapplication.pedidos.domain.model.PlazoEntrega
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
