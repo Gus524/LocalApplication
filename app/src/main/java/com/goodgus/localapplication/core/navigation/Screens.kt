@@ -31,6 +31,16 @@ sealed interface AppRoute : NavKey {
     }
 
     @Serializable
+    data object Historial : AppRoute {
+        override val title: String = "Historial de Cuentas"
+    }
+
+    @Serializable
+    data class DetalleCuenta(val idCuenta: Int) : AppRoute {
+        override val title: String = "Detalle de Cuenta"
+    }
+
+    @Serializable
     data class Venta(val idVenta: String? = null) : AppRoute {
         override val title: String = if (idVenta != null) "Actualizar Venta" else "Nueva Venta"
     }

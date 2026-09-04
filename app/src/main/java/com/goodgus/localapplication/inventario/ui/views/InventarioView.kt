@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,8 +18,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,8 +44,11 @@ import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.core.theme.LocalApplicationTheme
 import com.goodgus.localapplication.core.ui.components.buttons.BotonEditar
 import com.goodgus.localapplication.core.ui.components.buttons.BotonEliminar
+import com.goodgus.localapplication.core.ui.components.chips.BadgeEstado
+import com.goodgus.localapplication.core.ui.components.chips.TipoEstadoSemantico
 import com.goodgus.localapplication.core.ui.components.dialogs.DialogoAlerta
 import com.goodgus.localapplication.core.ui.components.dialogs.DialogoConfirmacion
+import com.goodgus.localapplication.core.ui.components.feedback.EstadoVacio
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario
 import com.goodgus.localapplication.inventario.domain.model.Producto
@@ -50,6 +57,7 @@ import com.goodgus.localapplication.inventario.ui.viewModels.InventarioAction
 import com.goodgus.localapplication.inventario.ui.viewModels.InventarioEffect
 import com.goodgus.localapplication.inventario.ui.viewModels.InventarioUiState
 import com.goodgus.localapplication.inventario.ui.viewModels.InventarioViewModel
+import java.util.Locale
 
 @Composable
 fun InventarioScreen(
@@ -109,16 +117,35 @@ fun InventarioContent(
                     )
                 }
             }
-            items(
-                items = state.productos,
-                key = { it.id.valor }
-            ) { producto ->
-                ProductoCard(
-                    producto = producto,
-                    onEdit = { onAction(InventarioAction.OnEditarProducto(producto.id.valor)) },
-                    onDelete = { onAction(InventarioAction.OnSolicitarEliminar(producto.id.valor)) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                )
+
+            if (state.productos.isEmpty()) {
+                item {
+                    EstadoVacio(
+                        icono = Icons.Default.Inventory2,
+                        titulo = "No se encontraron productos",
+                        mensaje = if (state.busqueda.isNotBlank()) {
+                            "No hay resultados para \"${state.busqueda}\"."
+                        } else {
+                            "Tu catálogo está vacío. Toca el botón '+' para agregar el primer producto."
+                        },
+                        modifier = Modifier.padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                    )
+                }
+            } else {
+                items(
+                    items = state.productos,
+                    key = { it.id.valor }
+                ) { producto ->
+                    ProductoCard(
+                        producto = producto,
+                        onEdit = { onAction(InventarioAction.OnEditarProducto(producto.id.valor)) },
+                        onDelete = { onAction(InventarioAction.OnSolicitarEliminar(producto.id.valor)) },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
             }
         }
 
@@ -141,7 +168,7 @@ fun InventarioContent(
     if (state.mostrarDialogoEliminar) {
         DialogoConfirmacion(
             titulo = "Dar de baja producto",
-            mensaje = "¿Seguro que deseas desactivar este producto?",
+            mensaje = "¿Seguro que deseas desactivar este producto del catálogo?",
             onConfirmar = { onAction(InventarioAction.OnConfirmarEliminar) },
             onDescartar = { onAction(InventarioAction.OnCancelarEliminar) },
             textoConfirmar = "Dar de baja",
@@ -164,32 +191,79 @@ fun ProductoCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(modifier = modifier.fillMaxWidth()) {
-        Row(
+    val stock = producto.inventario.disponibles
+    val badgeTipo = when {
+        stock == 0 -> TipoEstadoSemantico.ERROR
+        stock <= 5 -> TipoEstadoSemantico.ADVERTENCIA
+        else -> TipoEstadoSemantico.EXITO
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = producto.nombre,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Precio: $${producto.precioVenta.monto} | Stock: ${producto.inventario.disponibles}",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "Marca: ${producto.marca.ifBlank { "N/A" }} | Tipo: ${producto.tipo.ifBlank { "General" }}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "$ ${String.format(Locale.US, "%.2f", producto.precioVenta.monto)}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
-            Row {
-                BotonEditar(onClick = onEdit)
-                BotonEliminar(onClick = onDelete)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    BadgeEstado(texto = "$stock", tipo = badgeTipo)
+
+                    val categoriaInfo = buildString {
+                        if (producto.marca.isNotBlank()) append(producto.marca)
+                        if (producto.tipo.isNotBlank()) {
+                            if (isNotEmpty()) append(" • ")
+                            append(producto.tipo)
+                        }
+                    }
+                    if (categoriaInfo.isNotBlank()) {
+                        Text(
+                            text = categoriaInfo,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BotonEditar(onClick = onEdit)
+                    BotonEliminar(onClick = onDelete)
+                }
             }
         }
     }

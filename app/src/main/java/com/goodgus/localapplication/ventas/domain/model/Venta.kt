@@ -16,6 +16,8 @@ data class Venta(
     val estado: EstadoVenta = EstadoVenta.ACTIVA
 ) : Entity<VentaId> {
 
+    val estaActiva: Boolean get() = estado == EstadoVenta.ACTIVA
+
     val subtotal: Dinero
         get() = if (estado == EstadoVenta.ACTIVA) {
             detalle.subtotal

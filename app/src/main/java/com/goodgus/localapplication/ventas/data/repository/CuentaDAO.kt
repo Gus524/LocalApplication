@@ -25,6 +25,9 @@ interface CuentaDAO : BaseDao<CuentaEntity> {
     @Query("SELECT * FROM Cuenta")
     fun getCuenta(): Flow<List<CuentaEntity>>
 
+    @Query("SELECT * FROM Cuenta WHERE estado_cuenta = 0 ORDER BY id_cuenta DESC")
+    fun getCuentasCerradas(): Flow<List<CuentaEntity>>
+
     @Query("SELECT * FROM GetCuenta WHERE estado_cuenta = 1 AND estado_venta = 1 ORDER BY id_venta DESC")
     fun getCuentaActiva(): Flow<List<GetCuenta>>
 

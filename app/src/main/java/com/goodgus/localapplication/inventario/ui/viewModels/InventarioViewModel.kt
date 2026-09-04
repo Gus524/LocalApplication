@@ -105,11 +105,11 @@ class InventarioViewModel @Inject constructor(
             )
             resultado.fold(
                 onSuccess = {
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Producto dado de baja correctamente")
                     _uiState.update {
                         it.copy(
                             mostrarDialogoEliminar = false,
-                            idProductoEliminar = null,
-                            mensajeAlerta = "Producto dado de baja correctamente"
+                            idProductoEliminar = null
                         )
                     }
                 },

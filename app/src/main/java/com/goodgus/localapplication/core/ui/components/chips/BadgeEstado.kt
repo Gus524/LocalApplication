@@ -51,8 +51,8 @@ fun BadgeEstado(
             Icons.Default.HourglassTop
         )
         TipoEstadoSemantico.ERROR -> Triple(
-            Color(0xFFFFEBEE),
-            Color(0xFFC62828),
+            Color(0xFFFDE8E8),
+            Color(0xFF991B1B),
             Icons.Default.Cancel
         )
         TipoEstadoSemantico.NEUTRO -> Triple(

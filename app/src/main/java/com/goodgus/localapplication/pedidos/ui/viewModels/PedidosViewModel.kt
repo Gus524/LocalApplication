@@ -103,7 +103,7 @@ class PedidosViewModel @Inject constructor(
             val resultado = entregarPedidoUseCase(EntregarPedidoParams(pedidoId = id))
             resultado.fold(
                 onSuccess = {
-                    _uiState.update { it.copy(mensajeAlerta = "Pedido marcado como entregado") }
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Pedido marcado como entregado")
                 },
                 onFailure = { error ->
                     _uiState.update { it.copy(mensajeAlerta = "Error: ${error.message ?: "No se pudo entregar el pedido"}") }
@@ -118,11 +118,11 @@ class PedidosViewModel @Inject constructor(
             val resultado = cancelarPedidoUseCase(CancelarPedidoParams(pedidoId = id))
             resultado.fold(
                 onSuccess = {
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Pedido cancelado correctamente")
                     _uiState.update {
                         it.copy(
                             mostrarDialogoCancelar = false,
-                            idPedidoCancelar = null,
-                            mensajeAlerta = "Pedido cancelado correctamente"
+                            idPedidoCancelar = null
                         )
                     }
                 },

@@ -155,6 +155,7 @@ class VentaViewModel @Inject constructor(
 
             resultado.fold(
                 onSuccess = {
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Venta registrada con éxito")
                     _effect.trySend(VentaFormEffect.NavegarAtras)
                 },
                 onFailure = { error ->

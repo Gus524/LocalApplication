@@ -17,8 +17,10 @@ import com.goodgus.localapplication.inventario.ui.views.InventarioScreen
 import com.goodgus.localapplication.inventario.ui.views.ProductoScreen
 import com.goodgus.localapplication.pedidos.ui.views.EditPedidoScreen
 import com.goodgus.localapplication.pedidos.ui.views.PedidoScreen
-import com.goodgus.localapplication.ventas.ui.views.VentaScreen
+import com.goodgus.localapplication.ventas.ui.views.DetalleCuentaScreen
+import com.goodgus.localapplication.ventas.ui.views.HistorialScreen
 import com.goodgus.localapplication.ventas.ui.views.HomeScreen
+import com.goodgus.localapplication.ventas.ui.views.VentaScreen
 
 /**
  * Composable encargado de la navegación de toda la aplicación utilizando Navigation 3.
@@ -39,7 +41,8 @@ fun NavigationWrapper() {
 
     AppScaffold(
         currentRoute = currentRoute,
-        onTabSelected = onNavigateToTab
+        onTabSelected = onNavigateToTab,
+        onNavigateBack = if (backStack.size > 1) { { backStack.removeLastOrNull() } } else null
     ) { padding ->
         NavDisplay(
             backStack = backStack,
@@ -65,6 +68,21 @@ fun NavigationWrapper() {
                     PedidoScreen(
                         navigateToPedido = { idPedido ->
                             backStack.add(AppRoute.EditPedido(idPedido = idPedido.ifBlank { null }))
+                        }
+                    )
+                }
+                entry<AppRoute.Historial> {
+                    HistorialScreen(
+                        navigateToDetalle = { idCuenta ->
+                            backStack.add(AppRoute.DetalleCuenta(idCuenta = idCuenta))
+                        }
+                    )
+                }
+                entry<AppRoute.DetalleCuenta> { detalleKey ->
+                    DetalleCuentaScreen(
+                        idCuenta = detalleKey.idCuenta,
+                        navigateBack = {
+                            backStack.removeLastOrNull()
                         }
                     )
                 }

@@ -115,6 +115,8 @@ class ProductoViewModel @Inject constructor(
 
             resultado.fold(
                 onSuccess = {
+                    val msg = if (estado.esEdicion) "Producto actualizado correctamente" else "Producto registrado con éxito"
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje(msg)
                     _effect.trySend(ProductoFormEffect.NavegarAtras)
                 },
                 onFailure = { error ->

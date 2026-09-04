@@ -2,8 +2,8 @@ package com.goodgus.localapplication.core.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,7 +35,7 @@ fun AppNavigation(
         NavigationItem(AppRoute.Home, Icons.Filled.Home, "Cuenta"),
         NavigationItem(AppRoute.Inventario, Icons.AutoMirrored.Filled.List, "Inventario"),
         NavigationItem(AppRoute.Pedidos, Icons.Filled.Star, "Pedidos"),
-        NavigationItem(AppRoute.Compras, Icons.Filled.ShoppingCart, "Compras")
+        NavigationItem(AppRoute.Historial, Icons.AutoMirrored.Filled.ReceiptLong, "Historial")
     )
 
     AppButtonBar(

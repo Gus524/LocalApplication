@@ -117,6 +117,8 @@ class EditPedidoViewModel @Inject constructor(
 
             resultado.fold(
                 onSuccess = {
+                    val msg = if (estado.esEdicion) "Pedido actualizado correctamente" else "Pedido registrado con éxito"
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje(msg)
                     _effect.trySend(EditPedidoEffect.NavegarAtras)
                 },
                 onFailure = { error ->

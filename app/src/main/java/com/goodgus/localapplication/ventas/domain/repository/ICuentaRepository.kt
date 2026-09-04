@@ -14,4 +14,7 @@ interface ICuentaRepository : IRepository<Cuenta, CuentaId> {
     fun observarCuentaActiva(): Flow<Cuenta?> = flow {
         emit(obtenerCuentaActiva())
     }
+    fun observarCuentasCerradas(): Flow<List<Cuenta>> = flow {
+        emit(emptyList())
+    }
 }

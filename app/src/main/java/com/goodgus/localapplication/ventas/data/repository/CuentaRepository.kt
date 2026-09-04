@@ -70,6 +70,14 @@ class CuentaRepository @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
+    override fun observarCuentasCerradas(): Flow<List<Cuenta>> {
+        return dao.getCuentasCerradas()
+            .map { list ->
+                list.mapNotNull { onHydrateAggregate(CuentaId(it.idCuenta)) }
+            }
+            .flowOn(ioDispatcher)
+    }
+
     override suspend fun guardar(agregado: Cuenta): Result<Unit> = executeIo {
         val entity = cuentaMapper.toPersistence(agregado)
         dao.insert(entity)

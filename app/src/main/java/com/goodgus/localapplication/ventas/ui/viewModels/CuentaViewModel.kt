@@ -106,6 +106,7 @@ class CuentaViewModel @Inject constructor(
             val resultado = abrirCuentaUseCase(AbrirCuentaParams(fecha = today))
             resultado.fold(
                 onSuccess = {
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Nueva cuenta abierta")
                     observarCuenta()
                 },
                 onFailure = { error ->
@@ -123,11 +124,11 @@ class CuentaViewModel @Inject constructor(
             val resultado = cerrarCuentaUseCase(CerrarCuentaParams(cuentaId = cuenta.id.valor))
             resultado.fold(
                 onSuccess = {
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Cuenta cerrada exitosamente")
                     _uiState.update {
                         it.copy(
                             cuentaActiva = null,
-                            mostrarDialogoCerrarCuenta = false,
-                            mensajeAlerta = "Cuenta cerrada exitosamente"
+                            mostrarDialogoCerrarCuenta = false
                         )
                     }
                 },
@@ -155,11 +156,11 @@ class CuentaViewModel @Inject constructor(
             )
             resultado.fold(
                 onSuccess = {
+                    com.goodgus.localapplication.core.ui.components.feedback.SnackbarManager.mostrarMensaje("Venta anulada correctamente")
                     _uiState.update {
                         it.copy(
                             mostrarDialogoEliminarVenta = false,
-                            idVentaEliminar = null,
-                            mensajeAlerta = "Venta anulada correctamente"
+                            idVentaEliminar = null
                         )
                     }
                 },

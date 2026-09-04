@@ -20,10 +20,13 @@ data class Cuenta(
     val estaAbierta: Boolean get() = informacion.estaAbierta
 
     val totalCalculado: Dinero
-        get() = ventas
-            .filter { it.estado == EstadoVenta.ACTIVA }
-            .map { it.subtotal }
-            .fold(Dinero.CERO) { acc, subtotal -> acc + subtotal }
+        get() {
+            val sumaVentas = ventas
+                .filter { it.estado == EstadoVenta.ACTIVA }
+                .map { it.subtotal }
+                .fold(Dinero.CERO) { acc, subtotal -> acc + subtotal }
+            return if (ventas.isNotEmpty()) sumaVentas else informacion.total
+        }
 
     /**
      * Regla de negocio: Registrar una venta en la cuenta activa y descontar stock.
