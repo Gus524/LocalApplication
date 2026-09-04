@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
 import com.goodgus.localapplication.inventario.usecase.CambiarEstadoProductoParams
 import com.goodgus.localapplication.inventario.usecase.CambiarEstadoProductoUseCase
-import com.goodgus.localapplication.models.data.Producto
+import com.goodgus.localapplication.inventario.data.repository.Producto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

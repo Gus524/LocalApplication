@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.models.data.Producto
+import com.goodgus.localapplication.inventario.data.repository.Producto
 import com.goodgus.localapplication.shared.utilidades.formatPrecio
 import com.goodgus.localapplication.shared.utilidades.parsePrecio
 

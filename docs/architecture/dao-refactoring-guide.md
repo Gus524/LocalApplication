@@ -129,10 +129,10 @@ interface BaseDao<T> {
 
 ## 5. Checklist de Ejecución para la Próxima Sesión
 
-1. [ ] Actualizar [`BaseDao.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/BaseDao.kt) con `suspend` y método `insertAll`.
-2. [ ] Refactorizar [`ProductoDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/ProductoDAO.kt) eliminando queries redundantes (`addProduct`, `updateProducto`).
-3. [ ] Refactorizar [`CuentaDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/CuentaDAO.kt) y [`VentaDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/VentaDAO.kt).
-4. [ ] Refactorizar [`CompraDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/CompraDAO.kt) y [`CompraProductoDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/CompraProductoDAO.kt).
-5. [ ] Refactorizar [`PedidosDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/PedidosDAO.kt).
-6. [ ] Conectar los hooks `onHydrateQuery` y `onGetAllQuery` en cada `*Repository` concreto.
-7. [ ] Ejecutar la suite completa de pruebas unitarias (`./gradlew testDebugUnitTest`) para verificar cero regresiones.
+1. [x] Estandarizar [`BaseDao.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/BaseDao.kt) con operaciones CRUD elementales.
+2. [x] Refactorizar [`ProductoDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/ProductoDAO.kt) eliminando queries redundantes (`addProduct`, `updateProducto`) y unificando a `getById`, `getAll`, `getMaxId`.
+3. [x] Refactorizar [`CuentaDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/CuentaDAO.kt) y [`VentaDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/VentaDAO.kt) con contratos homogéneos.
+4. [x] Refactorizar [`CompraDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/CompraDAO.kt) y [`CompraProductoDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/CompraProductoDAO.kt).
+5. [x] Refactorizar [`PedidosDAO.kt`](file:///home/goodgus/Documents/Github/LocalApplication/app/src/main/java/com/goodgus/localapplication/DAO/PedidosDAO.kt).
+6. [x] Conectar los hooks `onHydrateQuery`, `onGetAllQuery` y `onHydrateAggregate` en cada `*Repository` concreto.
+7. [x] Ejecutar la suite completa de pruebas unitarias (`./gradlew testDebugUnitTest`) verificando 0 regresiones.

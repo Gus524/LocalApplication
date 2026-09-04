@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.goodgus.localapplication.shared.components.InfoCard
-import com.goodgus.localapplication.models.data.Pedidos
+import com.goodgus.localapplication.pedidos.data.repository.Pedidos
 import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 

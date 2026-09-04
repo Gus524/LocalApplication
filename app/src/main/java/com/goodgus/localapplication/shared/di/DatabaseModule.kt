@@ -1,13 +1,13 @@
 package com.goodgus.localapplication.shared.di
 
 import android.content.Context
-import com.goodgus.localapplication.DAO.AppDataBase
-import com.goodgus.localapplication.DAO.CompraDAO
-import com.goodgus.localapplication.DAO.CompraProductoDAO
-import com.goodgus.localapplication.DAO.CuentaDAO
-import com.goodgus.localapplication.DAO.PedidosDAO
-import com.goodgus.localapplication.DAO.ProductoDAO
-import com.goodgus.localapplication.DAO.VentaDAO
+import com.goodgus.localapplication.core.data.dao.AppDataBase
+import com.goodgus.localapplication.compras.data.repository.CompraDAO
+import com.goodgus.localapplication.compras.data.repository.CompraProductoDAO
+import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
+import com.goodgus.localapplication.pedidos.data.repository.PedidosDAO
+import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
+import com.goodgus.localapplication.ventas.data.repository.VentaDAO
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

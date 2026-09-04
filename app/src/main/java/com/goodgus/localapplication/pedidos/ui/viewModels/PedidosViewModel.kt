@@ -2,7 +2,7 @@ package com.goodgus.localapplication.pedidos.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goodgus.localapplication.models.data.Pedidos
+import com.goodgus.localapplication.pedidos.data.repository.Pedidos
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

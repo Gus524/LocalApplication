@@ -7,7 +7,7 @@ import com.goodgus.localapplication.compras.usecase.CancelarCompraParams
 import com.goodgus.localapplication.compras.usecase.CancelarCompraUseCase
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraParams
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraUseCase
-import com.goodgus.localapplication.models.data.Compra
+import com.goodgus.localapplication.compras.data.repository.Compra
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,17 +1,22 @@
-package com.goodgus.localapplication.DAO
+package com.goodgus.localapplication.core.data.dao
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.goodgus.localapplication.models.data.Compra
-import com.goodgus.localapplication.models.data.CompraProducto
-import com.goodgus.localapplication.models.data.Cuenta
-import com.goodgus.localapplication.models.data.Pedidos
-import com.goodgus.localapplication.models.data.Producto
-import com.goodgus.localapplication.models.data.Venta
-import com.goodgus.localapplication.models.dataView.GetCuenta
+import com.goodgus.localapplication.compras.data.repository.CompraDAO
+import com.goodgus.localapplication.compras.data.repository.CompraProductoDAO
+import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
+import com.goodgus.localapplication.pedidos.data.repository.PedidosDAO
+import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
+import com.goodgus.localapplication.ventas.data.repository.VentaDAO
+import com.goodgus.localapplication.compras.data.repository.Compra
+import com.goodgus.localapplication.compras.data.repository.CompraProducto
+import com.goodgus.localapplication.ventas.data.repository.Cuenta
+import com.goodgus.localapplication.pedidos.data.repository.Pedidos
+import com.goodgus.localapplication.inventario.data.repository.Producto
+import com.goodgus.localapplication.ventas.data.repository.Venta
+import com.goodgus.localapplication.ventas.data.repository.GetCuenta
 
 /**
  * Objeto para establecer la estructura de la base de datos, se declaran las tablas, las vistas y la version

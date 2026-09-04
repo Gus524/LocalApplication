@@ -38,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.goodgus.localapplication.shared.components.InfoCard
 import com.goodgus.localapplication.shared.components.ShowAlert
-import com.goodgus.localapplication.models.dataView.GetCuenta
+import com.goodgus.localapplication.ventas.data.repository.GetCuenta
 import com.goodgus.localapplication.ventas.ui.viewModels.CuentaViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 

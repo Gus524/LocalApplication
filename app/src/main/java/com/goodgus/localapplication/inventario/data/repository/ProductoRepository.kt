@@ -1,12 +1,11 @@
 package com.goodgus.localapplication.inventario.data.repository
 
-import com.goodgus.localapplication.DAO.ProductoDAO
 import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.inventario.data.mapper.ProductoMapper
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import com.goodgus.localapplication.models.data.Producto as ProductoEntity
+import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -18,11 +17,11 @@ class ProductoRepository @Inject constructor(
     IProductoRepository {
 
     override suspend fun onHydrateQuery(id: ProductoId): ProductoEntity? {
-        return dao.getProductId(id.valor)
+        return dao.getById(id.valor)
     }
 
     override suspend fun onGetAllQuery(): List<ProductoEntity> {
-        return dao.getAllProducts()
+        return dao.getAll()
     }
 
     override suspend fun siguienteId(): ProductoId = executeIo {

@@ -1,10 +1,11 @@
-package com.goodgus.localapplication.models.data
+package com.goodgus.localapplication.compras.data.repository
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.goodgus.localapplication.inventario.data.repository.Producto
 
 /**
  * Entidades de persistencia Room para las tablas Compra y Compra_Producto.

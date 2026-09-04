@@ -1,13 +1,12 @@
 package com.goodgus.localapplication.compras.data.repository
 
-import com.goodgus.localapplication.DAO.CompraDAO
-import com.goodgus.localapplication.DAO.ProductoDAO
+import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
 import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.compras.data.mapper.CompraMapper
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.CompraId
 import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
-import com.goodgus.localapplication.models.data.Compra as CompraEntity
+import com.goodgus.localapplication.compras.data.repository.Compra as CompraEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -22,26 +21,26 @@ class CompraRepository @Inject constructor(
     private val compraMapper = CompraMapper()
 
     override suspend fun onHydrateQuery(id: CompraId): CompraEntity? {
-        return dao.getCompraById(id.valor)
+        return dao.getById(id.valor)
     }
 
     override suspend fun onGetAllQuery(): List<CompraEntity> {
-        return dao.getCompra()
+        return dao.getAll()
     }
 
     override suspend fun siguienteId(): CompraId = executeIo {
         CompraId((dao.getMaxId() ?: 0) + 1)
     }.getOrDefault(CompraId(1))
 
-    override suspend fun obtenerPorId(id: CompraId): Compra? = executeIo {
-        val entity = onHydrateQuery(id) ?: return@executeIo null
+    override suspend fun onHydrateAggregate(id: CompraId): Compra? {
+        val entity = onHydrateQuery(id) ?: return null
         val items = dao.getItemsByCompraId(id.valor)
         val nombresMap = items.associate { item ->
-            val nombre = productoDao?.getProductId(item.idProducto)?.nombre ?: "Producto #${item.idProducto}"
+            val nombre = productoDao.getById(item.idProducto)?.nombre ?: "Producto #${item.idProducto}"
             item.idProducto to nombre
         }
-        compraMapper.toDomain(entity, items, nombresMap)
-    }.getOrNull()
+        return compraMapper.toDomain(entity, items, nombresMap)
+    }
 
     override suspend fun guardar(agregado: Compra): Result<Unit> = executeIo {
         val entity = compraMapper.toPersistence(agregado)

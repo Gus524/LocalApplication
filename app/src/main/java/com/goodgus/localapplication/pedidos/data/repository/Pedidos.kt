@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.models.data
+package com.goodgus.localapplication.pedidos.data.repository
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

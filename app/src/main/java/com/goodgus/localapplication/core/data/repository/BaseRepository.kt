@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.core.data.repository
 
-import com.goodgus.localapplication.DAO.BaseDao
+import com.goodgus.localapplication.core.data.dao.BaseDao
 import com.goodgus.localapplication.core.data.mapper.IMapper
 import com.goodgus.localapplication.core.domain.AggregateRoot
 import com.goodgus.localapplication.core.domain.IRepository
@@ -24,8 +24,8 @@ abstract class BaseRepository<TAggregate : AggregateRoot<TId>, TId, TPersistence
 ) : IRepository<TAggregate, TId> {
 
     /**
-     * Hook Template Method (Hydration): La implementación concreta ejecuta la consulta
-     * completa con sus relaciones por ID.
+     * Hook Template Method (Hydration Query): La implementación concreta ejecuta la consulta
+     * de la entidad de persistencia por su ID.
      */
     protected abstract suspend fun onHydrateQuery(id: TId): TPersistence?
 
@@ -33,11 +33,20 @@ abstract class BaseRepository<TAggregate : AggregateRoot<TId>, TId, TPersistence
      * Hook Template Method (List Query): La implementación concreta ejecuta la consulta
      * de listado general de entidades de persistencia.
      */
-    protected open suspend fun onGetAllQuery(): List<TPersistence> = emptyList()
+    protected abstract suspend fun onGetAllQuery(): List<TPersistence>
+
+    /**
+     * Hook Template Method (Hydration Aggregate): Hidrata el agregado de dominio completo por ID.
+     * Por defecto consulta la entidad de persistencia vía onHydrateQuery(id) y la mapea a dominio.
+     * Los agregados complejos (con entidades hijas) sobreescriben este método para resolver el árbol.
+     */
+    protected open suspend fun onHydrateAggregate(id: TId): TAggregate? {
+        val persistence = onHydrateQuery(id) ?: return null
+        return mapper.toDomain(persistence)
+    }
 
     override suspend fun obtenerPorId(id: TId): TAggregate? = executeIo {
-        val persistence = onHydrateQuery(id)
-        persistence?.let { mapper.toDomain(it) }
+        onHydrateAggregate(id)
     }.getOrNull()
 
     override suspend fun obtenerTodos(): List<TAggregate> = executeIo {

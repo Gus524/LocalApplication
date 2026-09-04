@@ -1,6 +1,6 @@
 package com.goodgus.localapplication.shared.data.repository
 
-import com.goodgus.localapplication.DAO.BaseDao
+import com.goodgus.localapplication.core.data.dao.BaseDao
 import com.goodgus.localapplication.core.data.mapper.IMapper
 import com.goodgus.localapplication.core.data.repository.BaseRepository
 import com.goodgus.localapplication.core.domain.AggregateRoot
@@ -18,7 +18,7 @@ import java.io.IOException
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseRepositoryTest {
 
-    private data class DummyId(val valor: String)
+    private data class DummyId(val valor: Int)
 
     private data class DummyAggregate(
         override val id: DummyId,
@@ -26,12 +26,12 @@ class BaseRepositoryTest {
     ) : AggregateRoot<DummyId>
 
     private data class DummyPersistence(
-        val id: String,
+        val id: Int,
         val nombre: String
     )
 
     private class FakeBaseDao : BaseDao<DummyPersistence> {
-        val databaseTable = mutableMapOf<String, DummyPersistence>()
+        val databaseTable = mutableMapOf<Int, DummyPersistence>()
         var throwOnNextInsert: Boolean = false
 
         override fun insert(entity: DummyPersistence): Long {
@@ -50,7 +50,11 @@ class BaseRepositoryTest {
             return if (databaseTable.remove(entity.id) != null) 1 else 0
         }
 
-        fun findById(id: String): DummyPersistence? = databaseTable[id]
+        fun getById(id: Int): DummyPersistence? = databaseTable[id]
+
+        fun getAll(): List<DummyPersistence> = databaseTable.values.toList()
+
+        fun getMaxId(): Int? = databaseTable.keys.maxOrNull()
     }
 
     private class DummyMapper : IMapper<DummyAggregate, DummyPersistence> {
@@ -72,14 +76,14 @@ class BaseRepositoryTest {
         private var idCounter = 1
 
         override suspend fun onHydrateQuery(id: DummyId): DummyPersistence? {
-            return dao.findById(id.valor)
+            return dao.getById(id.valor)
         }
 
         override suspend fun onGetAllQuery(): List<DummyPersistence> {
-            return dao.databaseTable.values.toList()
+            return dao.getAll()
         }
 
-        override suspend fun siguienteId(): DummyId = DummyId("dummy-${idCounter++}")
+        override suspend fun siguienteId(): DummyId = DummyId(idCounter++)
 
         fun mapearListaDominio(entities: List<DummyPersistence>): List<DummyAggregate> {
             return toDomainList(entities)
@@ -103,10 +107,10 @@ class BaseRepositoryTest {
 
     @Test
     fun `IMapper realiza mapeo bidireccional puro 1 a 1`() {
-        val domain = DummyAggregate(id = DummyId("101"), nombre = "Test Domain")
+        val domain = DummyAggregate(id = DummyId(101), nombre = "Test Domain")
         val persistence = mapper.toPersistence(domain)
 
-        assertEquals("101", persistence.id)
+        assertEquals(101, persistence.id)
         assertEquals("Test Domain", persistence.nombre)
 
         val reconstructed = mapper.toDomain(persistence)
@@ -116,8 +120,8 @@ class BaseRepositoryTest {
     @Test
     fun `BaseRepository toDomainList y toPersistenceList mapean listas usando el IMapper inyectado`() {
         val domainList = listOf(
-            DummyAggregate(id = DummyId("1"), nombre = "A"),
-            DummyAggregate(id = DummyId("2"), nombre = "B")
+            DummyAggregate(id = DummyId(1), nombre = "A"),
+            DummyAggregate(id = DummyId(2), nombre = "B")
         )
         val persistenceList = repository.mapearListaPersistencia(domainList)
 
@@ -139,7 +143,7 @@ class BaseRepositoryTest {
 
         val agregadoObtenido = repository.obtenerPorId(id)
         assertEquals(aggregate, agregadoObtenido)
-        assertEquals("Item Guardado", dao.findById(id.valor)?.nombre)
+        assertEquals("Item Guardado", dao.getById(id.valor)?.nombre)
     }
 
     @Test
@@ -152,13 +156,13 @@ class BaseRepositoryTest {
         val resultadoActualizar = repository.actualizar(aggregateModificado)
 
         assertTrue(resultadoActualizar.isSuccess)
-        assertEquals("Nombre Actualizado", dao.findById(id.valor)?.nombre)
+        assertEquals("Nombre Actualizado", dao.getById(id.valor)?.nombre)
         assertEquals("Nombre Actualizado", repository.obtenerPorId(id)?.nombre)
     }
 
     @Test
     fun `BaseRepository actualizar falla con Result failure si la entidad no existe en el DAO`() = runBlocking {
-        val aggregateInexistente = DummyAggregate(id = DummyId("no-existe"), nombre = "Fantasma")
+        val aggregateInexistente = DummyAggregate(id = DummyId(9999), nombre = "Fantasma")
         val resultadoActualizar = repository.actualizar(aggregateInexistente)
 
         assertTrue(resultadoActualizar.isFailure)
@@ -174,13 +178,13 @@ class BaseRepositoryTest {
         val resultadoEliminar = repository.eliminar(id)
         assertTrue(resultadoEliminar.isSuccess)
         assertNull(repository.obtenerPorId(id))
-        assertNull(dao.findById(id.valor))
+        assertNull(dao.getById(id.valor))
     }
 
     @Test
     fun `BaseRepository executeIo captura excepciones de IO de forma segura en Result failure`() = runBlocking {
         dao.throwOnNextInsert = true
-        val aggregate = DummyAggregate(id = DummyId("error-1"), nombre = "Falla")
+        val aggregate = DummyAggregate(id = DummyId(10), nombre = "Falla")
 
         val resultado = repository.guardar(aggregate)
 
@@ -192,14 +196,14 @@ class BaseRepositoryTest {
 
     @Test
     fun `BaseRepository obtenerTodos recupera y mapea todas las entidades`() = runBlocking {
-        val item1 = DummyAggregate(id = DummyId("1"), nombre = "Item 1")
-        val item2 = DummyAggregate(id = DummyId("2"), nombre = "Item 2")
+        val item1 = DummyAggregate(id = DummyId(1), nombre = "Item 1")
+        val item2 = DummyAggregate(id = DummyId(2), nombre = "Item 2")
         repository.guardar(item1)
         repository.guardar(item2)
 
         val todos = repository.obtenerTodos()
         assertEquals(2, todos.size)
-        assertTrue(todos.any { it.id == DummyId("1") && it.nombre == "Item 1" })
-        assertTrue(todos.any { it.id == DummyId("2") && it.nombre == "Item 2" })
+        assertTrue(todos.any { it.id == DummyId(1) && it.nombre == "Item 1" })
+        assertTrue(todos.any { it.id == DummyId(2) && it.nombre == "Item 2" })
     }
 }

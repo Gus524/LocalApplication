@@ -1,7 +1,7 @@
 package com.goodgus.localapplication
 
 import android.app.Application
-import com.goodgus.localapplication.DAO.AppDataBase
+import com.goodgus.localapplication.core.data.dao.AppDataBase
 import dagger.hilt.android.HiltAndroidApp
 
 /*

@@ -1,9 +1,8 @@
 package com.goodgus.localapplication.ventas.data.repository
 
-import com.goodgus.localapplication.DAO.CuentaDAO
-import com.goodgus.localapplication.DAO.ProductoDAO
+import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
 import com.goodgus.localapplication.core.data.repository.BaseRepository
-import com.goodgus.localapplication.models.data.Cuenta as CuentaEntity
+import com.goodgus.localapplication.ventas.data.repository.Cuenta as CuentaEntity
 import com.goodgus.localapplication.ventas.data.mapper.CuentaMapper
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
@@ -22,31 +21,31 @@ class CuentaRepository @Inject constructor(
     private val cuentaMapper = CuentaMapper()
 
     override suspend fun onHydrateQuery(id: CuentaId): CuentaEntity? {
-        return dao.getCuentaById(id.valor)
+        return dao.getById(id.valor)
     }
 
     override suspend fun onGetAllQuery(): List<CuentaEntity> {
-        return dao.getAllCuentas()
+        return dao.getAll()
     }
 
     override suspend fun siguienteId(): CuentaId = executeIo {
         CuentaId((dao.getMaxId() ?: 0) + 1)
     }.getOrDefault(CuentaId(1))
 
-    override suspend fun obtenerPorId(id: CuentaId): Cuenta? = executeIo {
-        val entity = onHydrateQuery(id) ?: return@executeIo null
+    override suspend fun onHydrateAggregate(id: CuentaId): Cuenta? {
+        val entity = onHydrateQuery(id) ?: return null
         val ventas = dao.getVentasByCuentaId(id.valor)
         val nombresMap = ventas.associate { v ->
-            val nombre = productoDao?.getProductId(v.idProducto)?.nombre ?: "Producto #${v.idProducto}"
+            val nombre = productoDao.getById(v.idProducto)?.nombre ?: "Producto #${v.idProducto}"
             v.idProducto to nombre
         }
-        cuentaMapper.toDomain(entity, ventas, nombresMap)
-    }.getOrNull()
+        return cuentaMapper.toDomain(entity, ventas, nombresMap)
+    }
 
     override suspend fun obtenerCuentaActiva(): Cuenta? = executeIo {
         val activas = dao.getCuentaActivaNoVentas()
         val activaEntity = activas.firstOrNull() ?: return@executeIo null
-        obtenerPorId(CuentaId(activaEntity.idCuenta))
+        onHydrateAggregate(CuentaId(activaEntity.idCuenta))
     }.getOrNull()
 
     override suspend fun guardar(agregado: Cuenta): Result<Unit> = executeIo {

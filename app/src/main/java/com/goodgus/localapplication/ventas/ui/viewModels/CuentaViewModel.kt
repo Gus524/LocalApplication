@@ -2,9 +2,9 @@ package com.goodgus.localapplication.ventas.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goodgus.localapplication.DAO.CuentaDAO
-import com.goodgus.localapplication.models.data.Cuenta
-import com.goodgus.localapplication.models.dataView.GetCuenta
+import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
+import com.goodgus.localapplication.ventas.data.repository.Cuenta
+import com.goodgus.localapplication.ventas.data.repository.GetCuenta
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import com.goodgus.localapplication.ventas.usecase.AbrirCuentaParams
 import com.goodgus.localapplication.ventas.usecase.AbrirCuentaUseCase

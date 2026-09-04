@@ -3,7 +3,7 @@ package com.goodgus.localapplication.ventas.ui.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import com.goodgus.localapplication.models.data.Producto
+import com.goodgus.localapplication.inventario.data.repository.Producto
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import com.goodgus.localapplication.ventas.usecase.RegistrarVentaParams
 import com.goodgus.localapplication.ventas.usecase.RegistrarVentaUseCase

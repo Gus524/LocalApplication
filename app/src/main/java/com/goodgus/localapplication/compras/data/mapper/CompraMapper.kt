@@ -11,8 +11,8 @@ import com.goodgus.localapplication.compras.domain.model.InformacionCompra
 import com.goodgus.localapplication.compras.domain.model.ProductoComprado
 import com.goodgus.localapplication.compras.domain.model.ProductoCompradoId
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
-import com.goodgus.localapplication.models.data.Compra as CompraEntity
-import com.goodgus.localapplication.models.data.CompraProducto as CompraProductoEntity
+import com.goodgus.localapplication.compras.data.repository.Compra as CompraEntity
+import com.goodgus.localapplication.compras.data.repository.CompraProducto as CompraProductoEntity
 
 class CompraMapper : IMapper<Compra, CompraEntity> {
     override fun toDomain(entity: CompraEntity): Compra {

@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.models.dataView
+package com.goodgus.localapplication.ventas.data.repository
 
 import androidx.room.ColumnInfo
 import androidx.room.DatabaseView

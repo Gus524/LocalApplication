@@ -1,10 +1,10 @@
 package com.goodgus.localapplication.viewModels
 
 import android.app.Application
-import com.goodgus.localapplication.DAO.CuentaDAO
-import com.goodgus.localapplication.models.data.Cuenta as CuentaEntity
-import com.goodgus.localapplication.models.data.Venta
-import com.goodgus.localapplication.models.dataView.GetCuenta
+import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
+import com.goodgus.localapplication.ventas.data.repository.Cuenta as CuentaEntity
+import com.goodgus.localapplication.ventas.data.repository.Venta
+import com.goodgus.localapplication.ventas.data.repository.GetCuenta
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.model.EstadoCuenta
@@ -37,22 +37,22 @@ class CuentaViewModelTest {
     private class TestApp : Application()
 
     private class FakeCuentaDAO : CuentaDAO {
+        override fun insert(entity: CuentaEntity): Long = 1L
+        override fun update(entity: CuentaEntity): Int = 1
+        override fun delete(entity: CuentaEntity): Int = 1
+        override fun getById(id: Int): CuentaEntity? = null
+        override fun getAll(): List<CuentaEntity> = emptyList()
+        override fun getMaxId(): Int? = null
+
         override fun getCuenta(): Flow<List<CuentaEntity>> = flowOf(emptyList())
-        override fun getAllCuentas(): List<CuentaEntity> = emptyList()
-        override fun getCuentaById(idCuenta: Int): CuentaEntity? = null
         override fun getCuentaActiva(): Flow<List<GetCuenta>> = flowOf(emptyList())
         override fun getCuentaActivaNoVentas(): List<CuentaEntity> = emptyList()
         override fun getVentaId(idVenta: Int): GetCuenta? = null
         override fun closeAccount(): Int = 1
         override fun getAccountId(): Int = 1
-        override fun getMaxId(): Int? = null
-        override fun addAccount(): Long = 1L
         override fun getVentasByCuentaId(idCuenta: Int): List<Venta> = emptyList()
-        override fun insertVentas(ventas: List<Venta>) {}
+        override fun insertVentas(ventas: List<Venta>): List<Long> = emptyList()
         override fun deleteVentasByCuentaId(idCuenta: Int): Int = 1
-        override fun insert(entity: CuentaEntity): Long = 1L
-        override fun update(entity: CuentaEntity): Int = 1
-        override fun delete(entity: CuentaEntity): Int = 1
     }
 
     private class FakeCuentaRepository : ICuentaRepository {

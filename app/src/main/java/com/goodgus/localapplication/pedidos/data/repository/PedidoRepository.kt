@@ -1,8 +1,7 @@
 package com.goodgus.localapplication.pedidos.data.repository
 
-import com.goodgus.localapplication.DAO.PedidosDAO
 import com.goodgus.localapplication.core.data.repository.BaseRepository
-import com.goodgus.localapplication.models.data.Pedidos as PedidosEntity
+import com.goodgus.localapplication.pedidos.data.repository.Pedidos as PedidosEntity
 import com.goodgus.localapplication.pedidos.data.mapper.PedidoMapper
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.model.PedidoId
@@ -18,11 +17,11 @@ class PedidoRepository @Inject constructor(
     IPedidoRepository {
 
     override suspend fun onHydrateQuery(id: PedidoId): PedidosEntity? {
-        return dao.getPedidoById(id.valor)
+        return dao.getById(id.valor)
     }
 
     override suspend fun onGetAllQuery(): List<PedidosEntity> {
-        return dao.getAllPedidos()
+        return dao.getAll()
     }
 
     override suspend fun siguienteId(): PedidoId = executeIo {

@@ -7,7 +7,7 @@ import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
-import com.goodgus.localapplication.models.data.Producto as ProductoEntity
+import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
 
 class ProductoMapper : IMapper<Producto, ProductoEntity> {
     override fun toDomain(entity: ProductoEntity): Producto {

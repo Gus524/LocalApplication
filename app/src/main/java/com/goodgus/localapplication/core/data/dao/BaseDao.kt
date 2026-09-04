@@ -1,4 +1,4 @@
-package com.goodgus.localapplication.DAO
+package com.goodgus.localapplication.core.data.dao
 
 import androidx.room.Delete
 import androidx.room.Insert

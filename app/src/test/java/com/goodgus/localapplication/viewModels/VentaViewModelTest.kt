@@ -8,7 +8,7 @@ import com.goodgus.localapplication.inventario.domain.model.Inventario
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import com.goodgus.localapplication.models.data.Producto as ProductoEntity
+import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.model.EstadoCuenta
