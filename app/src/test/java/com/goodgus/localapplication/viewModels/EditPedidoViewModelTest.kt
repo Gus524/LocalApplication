@@ -105,4 +105,43 @@ class EditPedidoViewModelTest {
         assertEquals("3 leches", state.detalles)
         assertTrue(state.esEdicion)
     }
+
+    @Test
+    fun `OnIniciarNuevo reinicia el formulario a valores por defecto`() = testScope.runTest {
+        viewModel.onAction(EditPedidoAction.OnDescripcionChange("Pastel de Fresas"))
+        viewModel.onAction(EditPedidoAction.OnFechaEntregaChange("15-09-2026"))
+        assertEquals("Pastel de Fresas", viewModel.uiState.value.descripcion)
+
+        viewModel.onAction(EditPedidoAction.OnIniciarNuevo)
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.descripcion)
+        assertEquals("", state.detalles)
+        assertEquals("", state.fechaEntrega)
+        assertEquals(false, state.esEdicion)
+    }
+
+    @Test
+    fun `Guardar y Cargar manejan conversion de formato dd-MM-yyyy a ISO y viceversa`() = testScope.runTest {
+        // Cargar pedido con fecha ISO desde el repositorio
+        fakeRepository.pedidos[10] = Pedido(
+            id = PedidoId(10),
+            informacion = InformacionPedido("Cupcakes", "Vainilla"),
+            plazo = PlazoEntrega(fechaPedido = "2026-09-01", fechaEntrega = "2026-09-25"),
+            estado = EstadoPedido.PENDIENTE
+        )
+
+        viewModel.onAction(EditPedidoAction.OnCargarPedido(10))
+        advanceUntilIdle()
+
+        assertEquals("25-09-2026", viewModel.uiState.value.fechaEntrega)
+
+        // Editar fecha en formato UI
+        viewModel.onAction(EditPedidoAction.OnFechaEntregaChange("30-09-2026"))
+        viewModel.onAction(EditPedidoAction.OnGuardar)
+        advanceUntilIdle()
+
+        val pedidoActualizado = fakeRepository.pedidos[10]
+        assertEquals("2026-09-30", pedidoActualizado?.plazo?.fechaEntrega)
+    }
 }

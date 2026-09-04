@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goodgus.localapplication.core.theme.LocalApplicationTheme
 import com.goodgus.localapplication.core.ui.components.buttons.BotonesFormulario
 import com.goodgus.localapplication.core.ui.components.dialogs.DialogoAlerta
+import com.goodgus.localapplication.core.ui.components.inputs.CampoFecha
 import com.goodgus.localapplication.core.ui.components.inputs.CampoTexto
 import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoAction
 import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoEffect
@@ -34,8 +35,11 @@ fun EditPedidoScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(idPedido) {
-        idPedido?.toIntOrNull()?.let { id ->
+        val id = idPedido?.toIntOrNull()
+        if (id != null) {
             viewModel.onAction(EditPedidoAction.OnCargarPedido(id))
+        } else {
+            viewModel.onAction(EditPedidoAction.OnIniciarNuevo)
         }
     }
 
@@ -76,7 +80,8 @@ fun EditPedidoContent(
         CampoTexto(
             valor = state.descripcion,
             onValorChange = { onAction(EditPedidoAction.OnDescripcionChange(it)) },
-            label = "Descripción del Pedido"
+            label = "Descripción del Pedido",
+            error = if (state.descripcion.isBlank()) "La descripción es obligatoria" else null
         )
 
         Spacer(Modifier.height(8.dp))
@@ -90,10 +95,10 @@ fun EditPedidoContent(
 
         Spacer(Modifier.height(8.dp))
 
-        CampoTexto(
-            valor = state.fechaEntrega,
-            onValorChange = { onAction(EditPedidoAction.OnFechaEntregaChange(it)) },
-            label = "Fecha de entrega (YYYY-MM-DD)"
+        CampoFecha(
+            fecha = state.fechaEntrega,
+            onFechaChange = { onAction(EditPedidoAction.OnFechaEntregaChange(it)) },
+            label = "Fecha de entrega"
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -121,7 +126,7 @@ private fun EditPedidoContentPreview() {
             state = EditPedidoUiState(
                 descripcion = "Pastel de Chocolate",
                 detalles = "Relleno de fresa",
-                fechaEntrega = "2026-09-10",
+                fechaEntrega = "10-09-2026",
                 esEdicion = false
             ),
             onAction = {},

@@ -63,8 +63,8 @@ fun NavigationWrapper() {
                 }
                 entry<AppRoute.Pedidos> {
                     PedidoScreen(
-                        navigateToPedido = {
-                            backStack.add(AppRoute.EditPedido())
+                        navigateToPedido = { idPedido ->
+                            backStack.add(AppRoute.EditPedido(idPedido = idPedido.ifBlank { null }))
                         }
                     )
                 }

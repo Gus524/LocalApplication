@@ -95,4 +95,43 @@ class PedidosViewModelTest {
         assertEquals(EstadoPedido.ENTREGADO, fakeRepository.pedidos[1]?.estado)
         assertEquals("Pedido marcado como entregado", viewModel.uiState.value.mensajeAlerta)
     }
+
+    @Test
+    fun `OnFiltrarEstado filtra pedidos y calcula conteos correctamente`() = testScope.runTest {
+        fakeRepository.pedidos[2] = Pedido(
+            id = PedidoId(2),
+            informacion = InformacionPedido("Gelatina de fresa", null),
+            plazo = PlazoEntrega("2026-09-03", "2026-09-04"),
+            estado = EstadoPedido.ENTREGADO
+        )
+        fakeRepository.pedidos[3] = Pedido(
+            id = PedidoId(3),
+            informacion = InformacionPedido("Galletas surtidas", null),
+            plazo = PlazoEntrega("2026-09-03", null),
+            estado = EstadoPedido.CANCELADO
+        )
+
+        viewModel.onAction(PedidosAction.OnCargarPedidos)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(3, state.contarPorEstado(null))
+        assertEquals(1, state.contarPorEstado(EstadoPedido.PENDIENTE))
+        assertEquals(1, state.contarPorEstado(EstadoPedido.ENTREGADO))
+        assertEquals(1, state.contarPorEstado(EstadoPedido.CANCELADO))
+
+        // Filtrar por PENDIENTE
+        viewModel.onAction(PedidosAction.OnFiltrarEstado(EstadoPedido.PENDIENTE))
+        assertEquals(1, viewModel.uiState.value.pedidosFiltrados.size)
+        assertEquals(PedidoId(1), viewModel.uiState.value.pedidosFiltrados[0].id)
+
+        // Filtrar por ENTREGADO
+        viewModel.onAction(PedidosAction.OnFiltrarEstado(EstadoPedido.ENTREGADO))
+        assertEquals(1, viewModel.uiState.value.pedidosFiltrados.size)
+        assertEquals(PedidoId(2), viewModel.uiState.value.pedidosFiltrados[0].id)
+
+        // Volver a Todos (null)
+        viewModel.onAction(PedidosAction.OnFiltrarEstado(null))
+        assertEquals(3, viewModel.uiState.value.pedidosFiltrados.size)
+    }
 }

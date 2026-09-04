@@ -31,6 +31,7 @@ data class ProductoFormUiState(
 )
 
 sealed interface ProductoFormAction {
+    data object OnIniciarNuevo : ProductoFormAction
     data class OnNombreChange(val valor: String) : ProductoFormAction
     data class OnMarcaChange(val valor: String) : ProductoFormAction
     data class OnTipoChange(val valor: String) : ProductoFormAction
@@ -60,6 +61,7 @@ class ProductoViewModel @Inject constructor(
 
     fun onAction(action: ProductoFormAction) {
         when (action) {
+            is ProductoFormAction.OnIniciarNuevo -> _uiState.value = ProductoFormUiState()
             is ProductoFormAction.OnNombreChange -> _uiState.update { it.copy(nombre = action.valor) }
             is ProductoFormAction.OnMarcaChange -> _uiState.update { it.copy(marca = action.valor) }
             is ProductoFormAction.OnTipoChange -> _uiState.update { it.copy(tipo = action.valor) }

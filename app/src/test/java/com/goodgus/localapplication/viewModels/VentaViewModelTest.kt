@@ -141,4 +141,41 @@ class VentaViewModelTest {
         val effectReceived = viewModel.effect.first()
         assertEquals(VentaFormEffect.NavegarAtras, effectReceived)
     }
+
+    @Test
+    fun `OnIniciarNuevo reinicia el formulario a valores por defecto`() = testScope.runTest {
+        val prod = fakeProductoRepository.productos[1]!!
+        viewModel.onAction(VentaFormAction.OnSeleccionarProducto(prod))
+        viewModel.onAction(VentaFormAction.OnCantidadChange(5))
+        assertEquals(5, viewModel.uiState.value.cantidad)
+        assertEquals(prod, viewModel.uiState.value.productoSeleccionado)
+
+        viewModel.onAction(VentaFormAction.OnIniciarNuevo)
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.busqueda)
+        assertEquals(null, state.productoSeleccionado)
+        assertEquals(1, state.cantidad)
+        assertEquals(0.0, state.subtotal, 0.001)
+    }
+
+    @Test
+    fun `OnPrecioChange actualiza precioUnitario, subtotal y permite registrar venta con precio personalizado`() = testScope.runTest {
+        val prod = fakeProductoRepository.productos[1]!!
+        viewModel.onAction(VentaFormAction.OnSeleccionarProducto(prod))
+        viewModel.onAction(VentaFormAction.OnCantidadChange(3))
+        assertEquals(12.0, viewModel.uiState.value.precioUnitario, 0.01)
+        assertEquals(36.0, viewModel.uiState.value.subtotal, 0.01)
+
+        viewModel.onAction(VentaFormAction.OnPrecioChange(10.0))
+        assertEquals(10.0, viewModel.uiState.value.precioUnitario, 0.01)
+        assertEquals(30.0, viewModel.uiState.value.subtotal, 0.01)
+
+        viewModel.onAction(VentaFormAction.OnGuardarVenta)
+        advanceUntilIdle()
+
+        val cuenta = fakeCuentaRepository.cuentas[1]
+        assertNotNull(cuenta)
+        assertEquals(30.0, cuenta?.totalCalculado?.monto ?: 0.0, 0.01)
+    }
 }

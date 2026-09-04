@@ -4,12 +4,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import com.goodgus.localapplication.core.navigation.AppNavigation
 import com.goodgus.localapplication.core.navigation.AppRoute
+
+val LocalSnackbarHostState = compositionLocalOf<SnackbarHostState> {
+    error("No SnackbarHostState provided")
+}
 
 /**
  * Lista de pantallas principales donde se muestra la barra de navegación inferior.
@@ -43,7 +52,11 @@ fun AppScaffold(
     title: String = currentRoute.title,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    Scaffold(
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             if (showSearch) {
                 ExpandableSearchBar(
@@ -73,4 +86,5 @@ fun AppScaffold(
         },
         content = content
     )
+}
 }

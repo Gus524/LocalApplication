@@ -116,4 +116,20 @@ class ProductoViewModelTest {
         assertEquals(20.0, state.precioVenta, 0.01)
         assertTrue(state.esEdicion)
     }
+
+    @Test
+    fun `OnIniciarNuevo reinicia el formulario a valores por defecto`() = testScope.runTest {
+        viewModel.onAction(ProductoFormAction.OnNombreChange("Sabritas"))
+        viewModel.onAction(ProductoFormAction.OnPrecioChange(25.0))
+        assertEquals("Sabritas", viewModel.uiState.value.nombre)
+
+        viewModel.onAction(ProductoFormAction.OnIniciarNuevo)
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.nombre)
+        assertEquals("", state.marca)
+        assertEquals(0.0, state.precioVenta, 0.001)
+        assertEquals(0, state.stock)
+        assertEquals(false, state.esEdicion)
+    }
 }

@@ -24,6 +24,7 @@ data class VentaFormUiState(
     val busqueda: String = "",
     val resultadosBusqueda: List<Producto> = emptyList(),
     val productoSeleccionado: Producto? = null,
+    val precioUnitario: Double = 0.0,
     val cantidad: Int = 1,
     val subtotal: Double = 0.0,
     val esEdicion: Boolean = false,
@@ -33,8 +34,10 @@ data class VentaFormUiState(
 )
 
 sealed interface VentaFormAction {
+    data object OnIniciarNuevo : VentaFormAction
     data class OnBuscarProducto(val query: String) : VentaFormAction
     data class OnSeleccionarProducto(val producto: Producto) : VentaFormAction
+    data class OnPrecioChange(val precio: Double) : VentaFormAction
     data class OnCantidadChange(val cantidad: Int) : VentaFormAction
     data class OnCargarVenta(val idVenta: Int) : VentaFormAction
     data object OnGuardarVenta : VentaFormAction
@@ -60,8 +63,10 @@ class VentaViewModel @Inject constructor(
 
     fun onAction(action: VentaFormAction) {
         when (action) {
+            is VentaFormAction.OnIniciarNuevo -> _uiState.value = VentaFormUiState()
             is VentaFormAction.OnBuscarProducto -> buscarProductos(action.query)
             is VentaFormAction.OnSeleccionarProducto -> seleccionarProducto(action.producto)
+            is VentaFormAction.OnPrecioChange -> actualizarPrecio(action.precio)
             is VentaFormAction.OnCantidadChange -> actualizarCantidad(action.cantidad)
             is VentaFormAction.OnCargarVenta -> cargarVenta(action.idVenta)
             is VentaFormAction.OnGuardarVenta -> guardarVenta()
@@ -85,9 +90,11 @@ class VentaViewModel @Inject constructor(
 
     private fun seleccionarProducto(producto: Producto) {
         _uiState.update {
-            val subtotal = it.cantidad * producto.precioVenta.monto
+            val precio = producto.precioVenta.monto
+            val subtotal = it.cantidad * precio
             it.copy(
                 productoSeleccionado = producto,
+                precioUnitario = precio,
                 mostrarResultados = false,
                 busqueda = producto.nombre,
                 subtotal = subtotal
@@ -95,10 +102,16 @@ class VentaViewModel @Inject constructor(
         }
     }
 
+    private fun actualizarPrecio(precio: Double) {
+        _uiState.update {
+            val subtotal = it.cantidad * precio
+            it.copy(precioUnitario = precio, subtotal = subtotal)
+        }
+    }
+
     private fun actualizarCantidad(cantidad: Int) {
         _uiState.update {
-            val prod = it.productoSeleccionado
-            val subtotal = if (prod != null) cantidad * prod.precioVenta.monto else 0.0
+            val subtotal = cantidad * it.precioUnitario
             it.copy(cantidad = cantidad, subtotal = subtotal)
         }
     }
@@ -117,6 +130,11 @@ class VentaViewModel @Inject constructor(
             return
         }
 
+        if (estado.precioUnitario < 0.0) {
+            _uiState.update { it.copy(mensajeAlerta = "El precio no puede ser negativo") }
+            return
+        }
+
         viewModelScope.launch {
             val cuentaActiva = cuentaRepository.obtenerCuentaActiva()
             if (cuentaActiva == null) {
@@ -131,7 +149,7 @@ class VentaViewModel @Inject constructor(
                     productoId = producto.id.valor,
                     cantidad = estado.cantidad,
                     hora = horaActual,
-                    precioPersonalizado = producto.precioVenta.monto
+                    precioPersonalizado = estado.precioUnitario
                 )
             )
 
@@ -160,6 +178,7 @@ class VentaViewModel @Inject constructor(
                         it.copy(
                             productoSeleccionado = producto,
                             idVenta = venta.id.valor,
+                            precioUnitario = venta.detalle.precioUnitario.monto,
                             cantidad = venta.detalle.cantidad.valor,
                             subtotal = venta.subtotal.monto,
                             busqueda = producto.nombre,

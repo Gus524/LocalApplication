@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -41,8 +41,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goodgus.localapplication.core.theme.LocalApplicationTheme
 import com.goodgus.localapplication.core.ui.components.buttons.BotonEditar
 import com.goodgus.localapplication.core.ui.components.buttons.BotonEliminar
+import com.goodgus.localapplication.core.ui.components.chips.BadgeEstado
+import com.goodgus.localapplication.core.ui.components.chips.FilaFiltrosChips
+import com.goodgus.localapplication.core.ui.components.chips.TipoEstadoSemantico
 import com.goodgus.localapplication.core.ui.components.dialogs.DialogoAlerta
 import com.goodgus.localapplication.core.ui.components.dialogs.DialogoConfirmacion
+import com.goodgus.localapplication.core.ui.components.feedback.EstadoVacio
 import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.InformacionPedido
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
@@ -52,6 +56,7 @@ import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosAction
 import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosEffect
 import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosUiState
 import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
+import com.goodgus.localapplication.shared.utilidades.FechaUtils
 
 @Composable
 fun PedidoScreen(
@@ -83,61 +88,79 @@ fun PedidosContent(
     onAction: (PedidosAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (state.pedidos.isEmpty()) {
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "No hay pedidos pendientes",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
+    val opcionesFiltro: List<EstadoPedido?> = listOf(
+        null,
+        EstadoPedido.PENDIENTE,
+        EstadoPedido.ENTREGADO,
+        EstadoPedido.CANCELADO
+    )
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            FilaFiltrosChips(
+                opciones = opcionesFiltro,
+                seleccionado = state.filtroEstado,
+                onSeleccionar = { onAction(PedidosAction.OnFiltrarEstado(it)) },
+                etiqueta = { estado ->
+                    when (estado) {
+                        null -> "Todos"
+                        EstadoPedido.PENDIENTE -> "Pendientes"
+                        EstadoPedido.ENTREGADO -> "Entregados"
+                        EstadoPedido.CANCELADO -> "Cancelados"
+                    }
+                },
+                contador = { estado -> state.contarPorEstado(estado) }
+            )
+
+            if (state.pedidosFiltrados.isEmpty()) {
+                EstadoVacio(
+                    icono = Icons.Default.LocalShipping,
+                    titulo = if (state.filtroEstado == null) "No hay pedidos registrados" else "No hay pedidos ${state.filtroEstado.name.lowercase()}",
+                    mensaje = if (state.filtroEstado == null) "Comienza registrando un nuevo pedido para tus clientes" else "No se encontraron pedidos con este filtro",
+                    textoBoton = "Agregar Pedido",
+                    onBotonClick = { onAction(PedidosAction.OnNuevoPedido) }
                 )
-                Button(onClick = { onAction(PedidosAction.OnNuevoPedido) }) {
-                    Text("Agregar Pedido")
+            } else {
+                val listState = rememberLazyListState()
+                val isFabVisible by remember {
+                    derivedStateOf {
+                        listState.firstVisibleItemIndex == 0 || !listState.isScrollInProgress
+                    }
                 }
-            }
-        }
-    } else {
-        val listState = rememberLazyListState()
-        val isFabVisible by remember {
-            derivedStateOf {
-                listState.firstVisibleItemIndex == 0 || !listState.isScrollInProgress
-            }
-        }
 
-        Box(modifier = modifier.fillMaxSize()) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(
-                    items = state.pedidos,
-                    key = { it.id.valor }
-                ) { pedido ->
-                    PedidoItemCard(
-                        pedido = pedido,
-                        onEntregar = { onAction(PedidosAction.OnEntregarPedido(pedido.id.valor)) },
-                        onEditar = { onAction(PedidosAction.OnEditarPedido(pedido.id.valor)) },
-                        onCancelar = { onAction(PedidosAction.OnSolicitarCancelarPedido(pedido.id.valor)) },
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                    )
-                }
-            }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(
+                            items = state.pedidosFiltrados,
+                            key = { it.id.valor }
+                        ) { pedido ->
+                            PedidoItemCard(
+                                pedido = pedido,
+                                onEntregar = { onAction(PedidosAction.OnEntregarPedido(pedido.id.valor)) },
+                                onEditar = { onAction(PedidosAction.OnEditarPedido(pedido.id.valor)) },
+                                onCancelar = { onAction(PedidosAction.OnSolicitarCancelarPedido(pedido.id.valor)) },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
 
-            AnimatedVisibility(
-                visible = isFabVisible,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp),
-                enter = fadeIn(animationSpec = tween(200)),
-                exit = fadeOut(animationSpec = tween(200))
-            ) {
-                FloatingActionButton(
-                    onClick = { onAction(PedidosAction.OnNuevoPedido) }
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Nuevo pedido")
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isFabVisible,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp),
+                        enter = fadeIn(animationSpec = tween(200)),
+                        exit = fadeOut(animationSpec = tween(200))
+                    ) {
+                        FloatingActionButton(
+                            onClick = { onAction(PedidosAction.OnNuevoPedido) }
+                        ) {
+                            Icon(Icons.Filled.Add, contentDescription = "Nuevo pedido")
+                        }
+                    }
                 }
             }
         }
@@ -179,10 +202,30 @@ fun PedidoItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = pedido.informacion.descripcion,
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = pedido.informacion.descripcion,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    BadgeEstado(
+                        texto = when (pedido.estado) {
+                            EstadoPedido.PENDIENTE -> "Pendiente"
+                            EstadoPedido.ENTREGADO -> "Entregado"
+                            EstadoPedido.CANCELADO -> "Cancelado"
+                        },
+                        tipo = when (pedido.estado) {
+                            EstadoPedido.PENDIENTE -> TipoEstadoSemantico.ADVERTENCIA
+                            EstadoPedido.ENTREGADO -> TipoEstadoSemantico.EXITO
+                            EstadoPedido.CANCELADO -> TipoEstadoSemantico.ERROR
+                        }
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(4.dp))
                 pedido.informacion.detalles?.let { det ->
                     if (det.isNotBlank()) {
@@ -192,19 +235,12 @@ fun PedidoItemCard(
                         )
                     }
                 }
+                val fechaPedidoUi = FechaUtils.formatearAUi(pedido.plazo.fechaPedido)
+                val fechaEntregaUi = pedido.plazo.fechaEntrega?.let { FechaUtils.formatearAUi(it) }
                 Text(
-                    text = "Pedido: ${pedido.plazo.fechaPedido}" + (pedido.plazo.fechaEntrega?.let { " | Entrega: $it" } ?: ""),
+                    text = "Pedido: $fechaPedidoUi" + (fechaEntregaUi?.let { " | Entrega: $it" } ?: ""),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Estado: ${pedido.estado.name}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = when (pedido.estado) {
-                        EstadoPedido.PENDIENTE -> MaterialTheme.colorScheme.primary
-                        EstadoPedido.ENTREGADO -> MaterialTheme.colorScheme.tertiary
-                        EstadoPedido.CANCELADO -> MaterialTheme.colorScheme.error
-                    }
                 )
             }
             if (pedido.estaPendiente) {

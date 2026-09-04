@@ -2,6 +2,7 @@ package com.goodgus.localapplication.pedidos.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
 import com.goodgus.localapplication.pedidos.usecase.CancelarPedidoParams
@@ -22,13 +23,21 @@ import javax.inject.Inject
 
 data class PedidosUiState(
     val pedidos: List<Pedido> = emptyList(),
+    val filtroEstado: EstadoPedido? = null,
     val idPedidoCancelar: Int? = null,
     val mostrarDialogoCancelar: Boolean = false,
     val mensajeAlerta: String? = null
-)
+) {
+    val pedidosFiltrados: List<Pedido>
+        get() = if (filtroEstado == null) pedidos else pedidos.filter { it.estado == filtroEstado }
+
+    fun contarPorEstado(estado: EstadoPedido?): Int =
+        if (estado == null) pedidos.size else pedidos.count { it.estado == estado }
+}
 
 sealed interface PedidosAction {
     data object OnCargarPedidos : PedidosAction
+    data class OnFiltrarEstado(val estado: EstadoPedido?) : PedidosAction
     data class OnEntregarPedido(val idPedido: Int) : PedidosAction
     data class OnSolicitarCancelarPedido(val idPedido: Int) : PedidosAction
     data object OnConfirmarCancelarPedido : PedidosAction
@@ -65,6 +74,7 @@ class PedidosViewModel @Inject constructor(
     fun onAction(action: PedidosAction) {
         when (action) {
             is PedidosAction.OnCargarPedidos -> observarPedidos()
+            is PedidosAction.OnFiltrarEstado -> _uiState.update { it.copy(filtroEstado = action.estado) }
             is PedidosAction.OnEntregarPedido -> entregarPedido(action.idPedido)
             is PedidosAction.OnSolicitarCancelarPedido -> _uiState.update {
                 it.copy(mostrarDialogoCancelar = true, idPedidoCancelar = action.idPedido)

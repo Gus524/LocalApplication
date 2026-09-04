@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.goodgus.localapplication.shared.utilidades.FechaUtils
 import javax.inject.Inject
 
 data class EditPedidoUiState(
@@ -31,6 +32,7 @@ data class EditPedidoUiState(
 )
 
 sealed interface EditPedidoAction {
+    data object OnIniciarNuevo : EditPedidoAction
     data class OnDescripcionChange(val valor: String) : EditPedidoAction
     data class OnDetallesChange(val valor: String) : EditPedidoAction
     data class OnFechaEntregaChange(val valor: String) : EditPedidoAction
@@ -58,6 +60,7 @@ class EditPedidoViewModel @Inject constructor(
 
     fun onAction(action: EditPedidoAction) {
         when (action) {
+            is EditPedidoAction.OnIniciarNuevo -> _uiState.value = EditPedidoUiState()
             is EditPedidoAction.OnDescripcionChange -> _uiState.update { it.copy(descripcion = action.valor) }
             is EditPedidoAction.OnDetallesChange -> _uiState.update { it.copy(detalles = action.valor) }
             is EditPedidoAction.OnFechaEntregaChange -> _uiState.update { it.copy(fechaEntrega = action.valor) }
@@ -76,7 +79,7 @@ class EditPedidoViewModel @Inject constructor(
                         id = pedido.id.valor,
                         descripcion = pedido.informacion.descripcion,
                         detalles = pedido.informacion.detalles ?: "",
-                        fechaEntrega = pedido.plazo.fechaEntrega ?: "",
+                        fechaEntrega = FechaUtils.formatearAUi(pedido.plazo.fechaEntrega),
                         esEdicion = true
                     )
                 }
@@ -88,8 +91,8 @@ class EditPedidoViewModel @Inject constructor(
 
     private fun guardar() {
         val estado = _uiState.value
-        val formato = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val today = LocalDate.now().format(formato)
+        val todayIso = FechaUtils.hoyIso()
+        val fechaEntregaIso = FechaUtils.formatearAIso(estado.fechaEntrega)
 
         viewModelScope.launch {
             val resultado = if (estado.esEdicion && estado.id != null) {
@@ -98,7 +101,7 @@ class EditPedidoViewModel @Inject constructor(
                         pedidoId = estado.id,
                         nuevaDescripcion = estado.descripcion,
                         nuevosDetalles = estado.detalles.ifBlank { null },
-                        nuevaFechaEntrega = estado.fechaEntrega.ifBlank { null }
+                        nuevaFechaEntrega = fechaEntregaIso
                     )
                 )
             } else {
@@ -106,8 +109,8 @@ class EditPedidoViewModel @Inject constructor(
                     CrearPedidoParams(
                         descripcion = estado.descripcion,
                         detalles = estado.detalles.ifBlank { null },
-                        fechaPedido = today,
-                        fechaEntrega = estado.fechaEntrega.ifBlank { null }
+                        fechaPedido = todayIso,
+                        fechaEntrega = fechaEntregaIso
                     )
                 )
             }

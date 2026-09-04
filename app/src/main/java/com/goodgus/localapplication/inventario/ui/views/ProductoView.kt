@@ -36,8 +36,11 @@ fun ProductoScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(idProducto) {
-        idProducto?.toIntOrNull()?.let { id ->
+        val id = idProducto?.toIntOrNull()
+        if (id != null) {
             viewModel.onAction(ProductoFormAction.OnCargarProducto(id))
+        } else {
+            viewModel.onAction(ProductoFormAction.OnIniciarNuevo)
         }
     }
 
@@ -78,7 +81,8 @@ fun ProductoFormContent(
         CampoTexto(
             valor = state.nombre,
             onValorChange = { onAction(ProductoFormAction.OnNombreChange(it)) },
-            label = "Nombre"
+            label = "Nombre",
+            error = if (state.nombre.isBlank()) "El nombre es obligatorio" else null
         )
 
         Spacer(Modifier.height(8.dp))
@@ -94,7 +98,8 @@ fun ProductoFormContent(
         CampoMoneda(
             precio = state.precioVenta,
             onPrecioChange = { onAction(ProductoFormAction.OnPrecioChange(it)) },
-            label = "Precio de venta"
+            label = "Precio de venta",
+            error = if (state.precioVenta <= 0.0) "El precio debe ser mayor a 0" else null
         )
 
         Spacer(Modifier.height(8.dp))

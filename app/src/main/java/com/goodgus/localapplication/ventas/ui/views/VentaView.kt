@@ -50,8 +50,11 @@ fun VentaScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(idVenta) {
-        idVenta?.toIntOrNull()?.let { id ->
+        val id = idVenta?.toIntOrNull()
+        if (id != null) {
             viewModel.onAction(VentaFormAction.OnCargarVenta(id))
+        } else {
+            viewModel.onAction(VentaFormAction.OnIniciarNuevo)
         }
     }
 
@@ -133,9 +136,9 @@ fun VentaFormContent(
             Spacer(Modifier.height(8.dp))
 
             CampoMoneda(
-                precio = prod.precioVenta.monto,
-                onPrecioChange = {},
-                readOnly = true,
+                precio = state.precioUnitario,
+                onPrecioChange = { onAction(VentaFormAction.OnPrecioChange(it)) },
+                readOnly = state.esEdicion,
                 label = "Precio Unitario"
             )
 
@@ -151,7 +154,7 @@ fun VentaFormContent(
             Spacer(Modifier.height(8.dp))
 
             CampoLectura(
-                valor = "$${state.subtotal}",
+                valor = "$${String.format(java.util.Locale.US, "%.2f", state.subtotal)}",
                 label = "Subtotal de la Venta"
             )
 
