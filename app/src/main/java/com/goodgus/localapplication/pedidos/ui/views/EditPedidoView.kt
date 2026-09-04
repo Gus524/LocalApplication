@@ -8,73 +8,124 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.shared.components.BotonesAcciones
-import com.goodgus.localapplication.shared.components.CampoText
-import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goodgus.localapplication.core.theme.LocalApplicationTheme
+import com.goodgus.localapplication.core.ui.components.buttons.BotonesFormulario
+import com.goodgus.localapplication.core.ui.components.dialogs.DialogoAlerta
+import com.goodgus.localapplication.core.ui.components.inputs.CampoTexto
+import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoAction
+import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoEffect
+import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoUiState
+import com.goodgus.localapplication.pedidos.ui.viewModels.EditPedidoViewModel
 
 @Composable
 fun EditPedidoScreen(
     idPedido: String? = null,
     navigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: EditPedidoViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    PedidoForm(
-        viewModel = viewModel,
-        uiState = uiState,
-        navigateBack = navigateBack
+    LaunchedEffect(idPedido) {
+        idPedido?.toIntOrNull()?.let { id ->
+            viewModel.onAction(EditPedidoAction.OnCargarPedido(id))
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is EditPedidoEffect.NavegarAtras -> navigateBack()
+            }
+        }
+    }
+
+    EditPedidoContent(
+        state = uiState,
+        onAction = viewModel::onAction,
+        onNavigateBack = navigateBack,
+        modifier = modifier
     )
 }
 
 @Composable
-fun PedidoForm(
-    viewModel: EditPedidoViewModel,
-    uiState: EditPedidoViewModel.PedidoUIState,
-    navigateBack: () -> Unit
+fun EditPedidoContent(
+    state: EditPedidoUiState,
+    onAction: (EditPedidoAction) -> Unit,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Text(
-            text = "Agregar nuevo pedido",
+            text = if (state.esEdicion) "Editar Pedido" else "Nuevo Pedido",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        CampoText(
-            text = uiState.descripcion,
-            onTextChange = { viewModel.updateDescripcion(it) },
-            label = "Descripcion"
+        CampoTexto(
+            valor = state.descripcion,
+            onValorChange = { onAction(EditPedidoAction.OnDescripcionChange(it)) },
+            label = "Descripción del Pedido"
         )
 
         Spacer(Modifier.height(8.dp))
 
-        CampoText(
-            text = uiState.detalles,
-            onTextChange = { viewModel.updateDetalles(it) },
-            label = "Detalles"
+        CampoTexto(
+            valor = state.detalles,
+            onValorChange = { onAction(EditPedidoAction.OnDetallesChange(it)) },
+            label = "Detalles adicionales (opcional)",
+            singleLine = false
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        CampoTexto(
+            valor = state.fechaEntrega,
+            onValorChange = { onAction(EditPedidoAction.OnFechaEntregaChange(it)) },
+            label = "Fecha de entrega (YYYY-MM-DD)"
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        BotonesAcciones(
-            onGuardar = {
-                viewModel.guardarPedido()
-                navigateBack()
-            },
-            onCancelar = {
-                navigateBack()
-            }
+        BotonesFormulario(
+            onGuardar = { onAction(EditPedidoAction.OnGuardar) },
+            onCancelar = onNavigateBack,
+            textoGuardar = if (state.esEdicion) "Actualizar" else "Registrar Pedido"
+        )
+    }
+
+    state.mensajeAlerta?.let { mensaje ->
+        DialogoAlerta(
+            mensaje = mensaje,
+            onAceptar = { onAction(EditPedidoAction.OnDismissAlerta) }
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun EditPedidoContentPreview() {
+    LocalApplicationTheme {
+        EditPedidoContent(
+            state = EditPedidoUiState(
+                descripcion = "Pastel de Chocolate",
+                detalles = "Relleno de fresa",
+                fechaEntrega = "2026-09-10",
+                esEdicion = false
+            ),
+            onAction = {},
+            onNavigateBack = {}
         )
     }
 }

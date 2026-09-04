@@ -1,17 +1,17 @@
 package com.goodgus.localapplication.viewModels
 
-import android.app.Application
-import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.CompraId
 import com.goodgus.localapplication.compras.domain.model.EstadoCompra
 import com.goodgus.localapplication.compras.domain.model.InformacionCompra
 import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
+import com.goodgus.localapplication.compras.ui.viewModels.CompraAction
 import com.goodgus.localapplication.compras.ui.viewModels.CompraViewModel
 import com.goodgus.localapplication.compras.usecase.CancelarCompraUseCase
 import com.goodgus.localapplication.compras.usecase.ProductoCompraParams
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraParams
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraUseCase
+import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
 import com.goodgus.localapplication.inventario.domain.model.Inventario
@@ -28,14 +28,11 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CompraViewModelTest {
-
-    private class TestApp : Application()
 
     private class FakeCompraRepository : ICompraRepository {
         val compras = mutableMapOf<Int, Compra>()
@@ -114,23 +111,22 @@ class CompraViewModelTest {
     }
 
     @Test
-    fun `loadCompras lista las compras existentes`() = testScope.runTest {
+    fun `inicializacion lista las compras existentes`() = testScope.runTest {
         fakeCompraRepository.compras[1] = Compra(
             id = CompraId(1),
             informacion = InformacionCompra("2026-09-03", EstadoCompra.REGISTRADA, Dinero(500.0))
         )
 
-        viewModel.loadCompras()
+        viewModel.onAction(CompraAction.OnCargarCompras)
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertEquals(1, state.compras.size)
-        assertEquals(500.0, state.compras[0].totalCompra, 0.01)
-        assertFalse(state.isBusy)
+        assertEquals(500.0, state.compras[0].informacion.total.monto, 0.01)
     }
 
     @Test
-    fun `registrarCompra crea compra y reabastece existencias`() = testScope.runTest {
+    fun `OnRegistrarCompra crea compra y reabastece existencias`() = testScope.runTest {
         val params = RegistrarCompraParams(
             fecha = "2026-09-03",
             listaCompra = listOf(
@@ -138,25 +134,26 @@ class CompraViewModelTest {
             )
         )
 
-        viewModel.registrarCompra(params)
+        viewModel.onAction(CompraAction.OnRegistrarCompra(params))
         advanceUntilIdle()
 
-        assertEquals("Compra registrada correctamente", viewModel.uiState.value.mensaje)
+        assertEquals("Compra registrada correctamente", viewModel.uiState.value.mensajeAlerta)
         assertEquals(1, fakeCompraRepository.compras.size)
         assertEquals(15, fakeProductoRepository.productos[1]?.inventario?.disponibles)
     }
 
     @Test
-    fun `cancelarCompra cancela la orden usando CancelarCompraUseCase`() = testScope.runTest {
+    fun `OnConfirmarCancelarCompra cancela la orden usando CancelarCompraUseCase`() = testScope.runTest {
         fakeCompraRepository.compras[1] = Compra(
             id = CompraId(1),
             informacion = InformacionCompra("2026-09-03", EstadoCompra.REGISTRADA, Dinero(100.0))
         )
 
-        viewModel.cancelarCompra(1)
+        viewModel.onAction(CompraAction.OnSolicitarCancelarCompra(1))
+        viewModel.onAction(CompraAction.OnConfirmarCancelarCompra)
         advanceUntilIdle()
 
-        assertEquals("Compra cancelada correctamente", viewModel.uiState.value.mensaje)
+        assertEquals("Compra cancelada correctamente", viewModel.uiState.value.mensajeAlerta)
         assertEquals(EstadoCompra.CANCELADA, fakeCompraRepository.compras[1]?.informacion?.estado)
     }
 }

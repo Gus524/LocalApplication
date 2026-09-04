@@ -1,6 +1,5 @@
 package com.goodgus.localapplication.viewModels
 
-import android.app.Application
 import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
@@ -8,16 +7,19 @@ import com.goodgus.localapplication.inventario.domain.model.Inventario
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.model.EstadoCuenta
 import com.goodgus.localapplication.ventas.domain.model.InformacionCuenta
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
+import com.goodgus.localapplication.ventas.ui.viewModels.VentaFormAction
+import com.goodgus.localapplication.ventas.ui.viewModels.VentaFormEffect
 import com.goodgus.localapplication.ventas.ui.viewModels.VentaViewModel
 import com.goodgus.localapplication.ventas.usecase.RegistrarVentaUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -26,15 +28,12 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VentaViewModelTest {
-
-    private class TestApp : Application()
 
     private class FakeProductoRepository : IProductoRepository {
         val productos = mutableMapOf<Int, Producto>()
@@ -115,35 +114,23 @@ class VentaViewModelTest {
     }
 
     @Test
-    fun `searchProduct busca en el catalogo a traves de IProductoRepository`() = testScope.runTest {
-        viewModel.updateSearch("Jugo")
-        viewModel.searchProduct()
+    fun `OnBuscarProducto busca en el catalogo a traves de IProductoRepository`() = testScope.runTest {
+        viewModel.onAction(VentaFormAction.OnBuscarProducto("Jugo"))
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals(1, state.resultado.size)
-        assertEquals("Jugo Naranja", state.resultado[0].nombre)
+        assertEquals(1, state.resultadosBusqueda.size)
+        assertEquals("Jugo Naranja", state.resultadosBusqueda[0].nombre)
     }
 
     @Test
-    fun `guardarVenta descuenta stock y registra linea en cuenta activa`() = testScope.runTest {
-        val prod = ProductoEntity(
-            idProducto = 1,
-            nombre = "Jugo Naranja",
-            marca = "Jumex",
-            precioVenta = 12.0,
-            disponibles = 10,
-            tipo = "Bebida"
-        )
-        viewModel.selectProduct(prod)
-        viewModel.updateCantidad(2)
+    fun `OnGuardarVenta descuenta stock y registra linea en cuenta activa emitiendo efecto`() = testScope.runTest {
+        val prod = fakeProductoRepository.productos[1]!!
+        viewModel.onAction(VentaFormAction.OnSeleccionarProducto(prod))
+        viewModel.onAction(VentaFormAction.OnCantidadChange(2))
 
-        viewModel.guardarVenta()
+        viewModel.onAction(VentaFormAction.OnGuardarVenta)
         advanceUntilIdle()
-
-        val state = viewModel.uiState.value
-        assertEquals("Venta registrada correctamente", state.mensaje)
-        assertFalse(state.isBusy)
 
         val cuenta = fakeCuentaRepository.cuentas[1]
         assertNotNull(cuenta)
@@ -152,5 +139,7 @@ class VentaViewModelTest {
 
         val producto = fakeProductoRepository.productos[1]
         assertEquals(8, producto?.inventario?.disponibles)
+        val effectReceived = viewModel.effect.first()
+        assertEquals(VentaFormEffect.NavegarAtras, effectReceived)
     }
 }

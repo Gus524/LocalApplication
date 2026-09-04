@@ -1,16 +1,17 @@
 package com.goodgus.localapplication.ventas.ui.views
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,205 +20,269 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.State
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.shared.components.InfoCard
-import com.goodgus.localapplication.shared.components.ShowAlert
-import com.goodgus.localapplication.ventas.data.repository.GetCuenta
-import com.goodgus.localapplication.ventas.ui.viewModels.CuentaViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goodgus.localapplication.core.domain.Cantidad
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.theme.LocalApplicationTheme
+import com.goodgus.localapplication.core.ui.components.buttons.BotonEditar
+import com.goodgus.localapplication.core.ui.components.buttons.BotonEliminar
+import com.goodgus.localapplication.core.ui.components.dialogs.DialogoAlerta
+import com.goodgus.localapplication.core.ui.components.dialogs.DialogoConfirmacion
+import com.goodgus.localapplication.inventario.domain.model.ProductoId
+import com.goodgus.localapplication.ventas.domain.model.Cuenta
+import com.goodgus.localapplication.ventas.domain.model.CuentaId
+import com.goodgus.localapplication.ventas.domain.model.DetalleVenta
+import com.goodgus.localapplication.ventas.domain.model.EstadoCuenta
+import com.goodgus.localapplication.ventas.domain.model.EstadoVenta
+import com.goodgus.localapplication.ventas.domain.model.InformacionCuenta
+import com.goodgus.localapplication.ventas.domain.model.Venta
+import com.goodgus.localapplication.ventas.domain.model.VentaId
+import com.goodgus.localapplication.ventas.ui.viewModels.CuentaAction
+import com.goodgus.localapplication.ventas.ui.viewModels.CuentaEffect
+import com.goodgus.localapplication.ventas.ui.viewModels.CuentaUiState
+import com.goodgus.localapplication.ventas.ui.viewModels.CuentaViewModel
 
 @Composable
 fun HomeScreen(
     navigateToVenta: (String) -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: CuentaViewModel = hiltViewModel()
 ) {
-    val cuentaActivaState: State<List<GetCuenta>> = viewModel.cuenta.collectAsState()
-    val cuentaActiva = cuentaActivaState.value
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if(cuentaActiva.isNotEmpty()) {
-        ShowCatalogo(cuentaActiva, navigateToVenta, uiState, viewModel)
-    } else {
-        viewModel.tryCuenta()
-        if(uiState.cuentaSinVentas.isNotEmpty()) {
-            ShowCatalogo(cuentaActiva, navigateToVenta, uiState, viewModel)
-        } else {
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is CuentaEffect.NavegarANuevaVenta -> navigateToVenta("")
+                is CuentaEffect.NavegarAEditarVenta -> navigateToVenta(effect.idVenta.toString())
+            }
+        }
+    }
+
+    CuentaContent(
+        state = uiState,
+        onAction = viewModel::onAction,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun CuentaContent(
+    state: CuentaUiState,
+    onAction: (CuentaAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cuenta = state.cuentaActiva
+
+    if (cuenta == null) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "No hay cuenta activa",
+                    text = "No hay cuenta abierta",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp, top = 32.dp)
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-                Button(onClick = { viewModel.openCuenta() }) {
+                Button(onClick = { onAction(CuentaAction.OnAbrirCuenta) }) {
                     Text("Abrir Cuenta")
                 }
             }
         }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ShowCatalogo(
-    ventas: List<GetCuenta>,
-    navigateToVenta: (String) -> Unit,
-    uiState: CuentaViewModel.CuentaUIState,
-    viewModel: CuentaViewModel
-){
-    val listState = rememberLazyListState()
-    var isFabVisible by remember { mutableStateOf(true) }
-    var previousIndex by remember { mutableIntStateOf(0) }
-
-    isFabVisible = remember {
-        derivedStateOf {
-            val currentFirstVisibleIndex = listState.firstVisibleItemIndex
-            val isScrollingUp = currentFirstVisibleIndex < previousIndex
-            previousIndex = currentFirstVisibleIndex // Actualiza previousIndex aquí
-            println("Índice actual: $currentFirstVisibleIndex, Índice anterior: $previousIndex, Subiendo: $isScrollingUp")
-            isScrollingUp || listState.firstVisibleItemIndex == 0 // Muestra el FAB si sube o está en el primer elemento
+    } else {
+        val listState = rememberLazyListState()
+        val isFabVisible by remember {
+            derivedStateOf {
+                listState.firstVisibleItemIndex == 0 || !listState.isScrollInProgress
+            }
         }
-    }.value
 
-
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize()
-        ){
-            stickyHeader {
-                Surface(tonalElevation = 4.dp) {
-                    Row (
-                        modifier = Modifier
-                            .padding(start = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ){
-                        Text("Total: $${String.format("%.2f", ventas.firstOrNull()?.totalCuenta)}",
+        Box(modifier = modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item {
+                    Surface(tonalElevation = 4.dp) {
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .padding(8.dp),
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Total de la cuenta:",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "$${cuenta.informacion.total.monto}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
+                items(
+                    items = cuenta.ventas.filter { it.estado == EstadoVenta.ACTIVA },
+                    key = { it.id.valor }
+                ) { venta ->
+                    VentaItemCard(
+                        venta = venta,
+                        onEdit = { onAction(CuentaAction.OnEditarVenta(venta.id.valor)) },
+                        onDelete = { onAction(CuentaAction.OnSolicitarEliminarVenta(venta.id.valor)) },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
             }
-            items(ventas) { venta ->
-                VentaCard(
-                    venta = venta,
-                    onEdit = { navigateToVenta(venta.idVenta.toString()) },
-                    onDelete = { viewModel.showAlert(venta.idVenta) },
-                )
-            }
-        }
-        AnimatedVisibility(
-            visible = isFabVisible,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(32.dp),
-            enter = fadeIn(animationSpec = tween(durationMillis = 300)),
-            exit = fadeOut(animationSpec = tween(durationMillis = 300))
-        ) {
-            FloatingActionButton(
-                onClick = { viewModel.showClose() }
+
+            AnimatedVisibility(
+                visible = isFabVisible,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(24.dp),
+                enter = fadeIn(animationSpec = tween(200)),
+                exit = fadeOut(animationSpec = tween(200))
             ) {
-                Icon(
-                    Icons.Filled.Clear,
-                    contentDescription = "Cerrar cuenta"
-                )
+                FloatingActionButton(
+                    onClick = { onAction(CuentaAction.OnSolicitarCerrarCuenta) },
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ) {
+                    Icon(Icons.Filled.Clear, contentDescription = "Cerrar cuenta")
+                }
             }
-        }
-        AnimatedVisibility(
-            visible = isFabVisible,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(32.dp),
-            enter = fadeIn(animationSpec = tween(durationMillis = 300)),
-            exit = fadeOut(animationSpec = tween(durationMillis = 300))
-        ) {
-            FloatingActionButton(
-                onClick = { navigateToVenta("") },
+
+            AnimatedVisibility(
+                visible = isFabVisible,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(24.dp),
+                enter = fadeIn(animationSpec = tween(200)),
+                exit = fadeOut(animationSpec = tween(200))
             ) {
-                Icon(
-                    Icons.Filled.Add,
-                    contentDescription = "Add venta"
-                )
+                FloatingActionButton(
+                    onClick = { onAction(CuentaAction.OnNuevaVenta) }
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Nueva venta")
+                }
             }
         }
     }
 
-    if(uiState.showDelete){
-        ShowDeleteAlert(
-            nombre = "¿Seguro que deseas eliminar esta venta?",
-            title = "Eliminar Venta",
-            onDismissDialog = { viewModel.closeAlert() },
-            onConfirm = { viewModel.deleteVenta() }
+    if (state.mostrarDialogoCerrarCuenta) {
+        DialogoConfirmacion(
+            titulo = "Cerrar Cuenta",
+            mensaje = "¿Deseas cerrar la cuenta actual? No se podrán registrar más ventas.",
+            onConfirmar = { onAction(CuentaAction.OnConfirmarCerrarCuenta) },
+            onDescartar = { onAction(CuentaAction.OnCancelarCerrarCuenta) },
+            textoConfirmar = "Cerrar Cuenta",
+            esDestructivo = true
         )
     }
 
-    if(uiState.showClose){
-        ShowDeleteAlert(
-            nombre = "Seguro que desas cerrar la cuenta actual?",
-            title = "Cerrar Cuenta",
-            onDismissDialog = { viewModel.closeAlert() },
-            onConfirm = { viewModel.closeCuenta() }
+    if (state.mostrarDialogoEliminarVenta) {
+        DialogoConfirmacion(
+            titulo = "Anular Venta",
+            mensaje = "¿Seguro que deseas anular esta venta?",
+            onConfirmar = { onAction(CuentaAction.OnConfirmarEliminarVenta) },
+            onDescartar = { onAction(CuentaAction.OnCancelarEliminarVenta) },
+            textoConfirmar = "Anular",
+            esDestructivo = true
+        )
+    }
+
+    state.mensajeAlerta?.let { mensaje ->
+        DialogoAlerta(
+            mensaje = mensaje,
+            onAceptar = { onAction(CuentaAction.OnDismissAlerta) }
         )
     }
 }
 
 @Composable
-fun ShowDeleteAlert(
-    nombre: String,
-    title: String,
-    onDismissDialog: () -> Unit,
-    onConfirm: () -> Unit
-){
-    ShowAlert(
-        onDismissRequest = onDismissDialog,
-        text = nombre,
-        title = title,
-        onConfirmButtonClick = onConfirm
-    )
-}
-
-@Composable
-fun VentaCard(
-    venta: GetCuenta,
+fun VentaItemCard(
+    venta: Venta,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = venta.nombreProducto,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Cant: ${venta.detalle.cantidad.valor} x $${venta.detalle.precioUnitario.monto} = $${venta.subtotal.monto}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Hora: ${venta.detalle.hora}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Row {
+                BotonEditar(onClick = onEdit)
+                BotonEliminar(onClick = onDelete)
+            }
+        }
+    }
+}
 
-    val ventaData = listOf(
-        "Hora" to venta.horaVenta,
-        "Marca" to venta.marca,
-        "Cantidad" to venta.cantidadProducto.toString(),
-        "Venta" to "$${venta.parcialVenta}"
-    )
-
-    InfoCard(
-        title = venta.nombre,
-        dataList = ventaData,
-        onEditClick = onEdit,
-        onDeleteClick = onDelete,
-        modifier = Modifier.padding(4.dp)
-    )
+@PreviewLightDark
+@Composable
+private fun CuentaContentPreview() {
+    LocalApplicationTheme {
+        CuentaContent(
+            state = CuentaUiState(
+                cuentaActiva = Cuenta(
+                    id = CuentaId(1),
+                    informacion = InformacionCuenta(
+                        fecha = "2026-09-03",
+                        estado = EstadoCuenta.ABIERTA,
+                        total = Dinero(75.0)
+                    ),
+                    ventas = listOf(
+                        Venta(
+                            id = VentaId(1),
+                            productoId = ProductoId(1),
+                            nombreProducto = "Sabritas Original 45g",
+                            detalle = DetalleVenta(
+                                cantidad = Cantidad(3),
+                                hora = "14:30",
+                                precioUnitario = Dinero(25.0)
+                            ),
+                            estado = EstadoVenta.ACTIVA
+                        )
+                    )
+                )
+            ),
+            onAction = {}
+        )
+    }
 }

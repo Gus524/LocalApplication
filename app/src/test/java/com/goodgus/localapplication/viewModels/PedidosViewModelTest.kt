@@ -1,13 +1,15 @@
 package com.goodgus.localapplication.viewModels
 
-import android.app.Application
 import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
 import com.goodgus.localapplication.pedidos.domain.model.InformacionPedido
 import com.goodgus.localapplication.pedidos.domain.model.Pedido
 import com.goodgus.localapplication.pedidos.domain.model.PedidoId
 import com.goodgus.localapplication.pedidos.domain.model.PlazoEntrega
 import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
+import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosAction
 import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
+import com.goodgus.localapplication.pedidos.usecase.CancelarPedidoUseCase
+import com.goodgus.localapplication.pedidos.usecase.EntregarPedidoUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -18,14 +20,11 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PedidosViewModelTest {
-
-    private class TestApp : Application()
 
     private class FakePedidoRepository : IPedidoRepository {
         val pedidos = mutableMapOf<Int, Pedido>()
@@ -52,12 +51,16 @@ class PedidosViewModelTest {
     private val testScope = TestScope(testDispatcher)
 
     private lateinit var fakeRepository: FakePedidoRepository
+    private lateinit var entregarPedidoUseCase: EntregarPedidoUseCase
+    private lateinit var cancelarPedidoUseCase: CancelarPedidoUseCase
     private lateinit var viewModel: PedidosViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         fakeRepository = FakePedidoRepository()
+        entregarPedidoUseCase = EntregarPedidoUseCase(fakeRepository)
+        cancelarPedidoUseCase = CancelarPedidoUseCase(fakeRepository)
 
         fakeRepository.pedidos[1] = Pedido(
             id = PedidoId(1),
@@ -66,7 +69,7 @@ class PedidosViewModelTest {
             estado = EstadoPedido.PENDIENTE
         )
 
-        viewModel = PedidosViewModel(fakeRepository)
+        viewModel = PedidosViewModel(fakeRepository, entregarPedidoUseCase, cancelarPedidoUseCase)
     }
 
     @After
@@ -75,15 +78,21 @@ class PedidosViewModelTest {
     }
 
     @Test
-    fun `cargarPedidos carga pedidos correctamente en uiState y StateFlow`() = testScope.runTest {
-        viewModel.cargarPedidos()
+    fun `inicializacion carga pedidos correctamente en uiState`() = testScope.runTest {
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertEquals(1, state.pedidos.size)
-        assertEquals("Pastel de chocolate", state.pedidos[0].descripcion)
-        assertEquals("Para 20 personas", state.pedidos[0].detalles)
-        assertFalse(state.isBusy)
-        assertEquals(1, viewModel.pedidos.value.size)
+        assertEquals("Pastel de chocolate", state.pedidos[0].informacion.descripcion)
+    }
+
+    @Test
+    fun `OnEntregarPedido marca el pedido como entregado`() = testScope.runTest {
+        advanceUntilIdle()
+        viewModel.onAction(PedidosAction.OnEntregarPedido(1))
+        advanceUntilIdle()
+
+        assertEquals(EstadoPedido.ENTREGADO, fakeRepository.pedidos[1]?.estado)
+        assertEquals("Pedido marcado como entregado", viewModel.uiState.value.mensajeAlerta)
     }
 }

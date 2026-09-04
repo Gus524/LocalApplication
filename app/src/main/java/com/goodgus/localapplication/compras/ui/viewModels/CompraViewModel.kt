@@ -2,19 +2,43 @@ package com.goodgus.localapplication.compras.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
 import com.goodgus.localapplication.compras.usecase.CancelarCompraParams
 import com.goodgus.localapplication.compras.usecase.CancelarCompraUseCase
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraParams
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraUseCase
-import com.goodgus.localapplication.compras.data.repository.Compra
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class CompraUiState(
+    val compras: List<Compra> = emptyList(),
+    val idCompraCancelar: Int? = null,
+    val mostrarDialogoCancelar: Boolean = false,
+    val mensajeAlerta: String? = null
+)
+
+sealed interface CompraAction {
+    data object OnCargarCompras : CompraAction
+    data class OnRegistrarCompra(val params: RegistrarCompraParams) : CompraAction
+    data class OnSolicitarCancelarCompra(val idCompra: Int) : CompraAction
+    data object OnConfirmarCancelarCompra : CompraAction
+    data object OnDescartarCancelarCompra : CompraAction
+    data object OnDismissAlerta : CompraAction
+    data object OnNuevaCompra : CompraAction
+}
+
+sealed interface CompraEffect {
+    data object NavegarANuevaCompra : CompraEffect
+}
 
 @HiltViewModel
 class CompraViewModel @Inject constructor(
@@ -22,70 +46,80 @@ class CompraViewModel @Inject constructor(
     private val cancelarCompraUseCase: CancelarCompraUseCase,
     private val compraRepository: ICompraRepository
 ) : ViewModel() {
-    data class CompraUIState(
-        val idCompra: Int = 0,
-        val compras: List<Compra> = emptyList(),
-        val isBusy: Boolean = false,
-        val mensaje: String? = null
-    )
 
-    private val _uiState = MutableStateFlow(CompraUIState())
-    val uiState: StateFlow<CompraUIState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(CompraUiState())
+    val uiState: StateFlow<CompraUiState> = _uiState.asStateFlow()
+
+    private val _effect = Channel<CompraEffect>(Channel.BUFFERED)
+    val effect: Flow<CompraEffect> = _effect.receiveAsFlow()
 
     init {
-        loadCompras()
+        cargarCompras()
     }
 
-    fun loadCompras() {
-        _uiState.update { it.copy(isBusy = true) }
-        viewModelScope.launch {
-            val compras = compraRepository.obtenerTodos()
-            _uiState.update {
-                it.copy(
-                    compras = compras.map { c -> toUiEntity(c) },
-                    isBusy = false
-                )
+    fun onAction(action: CompraAction) {
+        when (action) {
+            is CompraAction.OnCargarCompras -> cargarCompras()
+            is CompraAction.OnRegistrarCompra -> registrarCompra(action.params)
+            is CompraAction.OnSolicitarCancelarCompra -> _uiState.update {
+                it.copy(mostrarDialogoCancelar = true, idCompraCancelar = action.idCompra)
             }
+            is CompraAction.OnConfirmarCancelarCompra -> confirmarCancelarCompra()
+            is CompraAction.OnDescartarCancelarCompra -> _uiState.update {
+                it.copy(mostrarDialogoCancelar = false, idCompraCancelar = null)
+            }
+            is CompraAction.OnDismissAlerta -> _uiState.update { it.copy(mensajeAlerta = null) }
+            is CompraAction.OnNuevaCompra -> _effect.trySend(CompraEffect.NavegarANuevaCompra)
         }
     }
 
-    fun registrarCompra(params: RegistrarCompraParams) {
-        _uiState.update { it.copy(isBusy = true) }
+    private fun cargarCompras() {
+        viewModelScope.launch {
+            val lista = compraRepository.obtenerTodos()
+            _uiState.update { it.copy(compras = lista) }
+        }
+    }
+
+    private fun registrarCompra(params: RegistrarCompraParams) {
         viewModelScope.launch {
             val resultado = registrarCompraUseCase(params)
             resultado.fold(
                 onSuccess = {
-                    loadCompras()
-                    _uiState.update { it.copy(mensaje = "Compra registrada correctamente", isBusy = false) }
+                    cargarCompras()
+                    _uiState.update { it.copy(mensajeAlerta = "Compra registrada correctamente") }
                 },
                 onFailure = { error ->
-                    _uiState.update { it.copy(mensaje = "Error: ${error.message}", isBusy = false) }
+                    _uiState.update { it.copy(mensajeAlerta = "Error: ${error.message ?: "No se pudo registrar la compra"}") }
                 }
             )
         }
     }
 
-    fun cancelarCompra(idCompra: Int) {
-        _uiState.update { it.copy(isBusy = true) }
+    private fun confirmarCancelarCompra() {
+        val id = _uiState.value.idCompraCancelar ?: return
         viewModelScope.launch {
-            val resultado = cancelarCompraUseCase(CancelarCompraParams(compraId = idCompra))
+            val resultado = cancelarCompraUseCase(CancelarCompraParams(compraId = id))
             resultado.fold(
                 onSuccess = {
-                    loadCompras()
-                    _uiState.update { it.copy(mensaje = "Compra cancelada correctamente", isBusy = false) }
+                    cargarCompras()
+                    _uiState.update {
+                        it.copy(
+                            mostrarDialogoCancelar = false,
+                            idCompraCancelar = null,
+                            mensajeAlerta = "Compra cancelada correctamente"
+                        )
+                    }
                 },
                 onFailure = { error ->
-                    _uiState.update { it.copy(mensaje = "Error: ${error.message}", isBusy = false) }
+                    _uiState.update {
+                        it.copy(
+                            mostrarDialogoCancelar = false,
+                            idCompraCancelar = null,
+                            mensajeAlerta = "Error: ${error.message ?: "No se pudo cancelar la compra"}"
+                        )
+                    }
                 }
             )
         }
-    }
-
-    private fun toUiEntity(domain: com.goodgus.localapplication.compras.domain.model.Compra): Compra {
-        return Compra(
-            idCompra = domain.id.valor,
-            totalCompra = domain.informacion.total.monto,
-            fechaCompra = domain.informacion.fechaCompra
-        )
     }
 }

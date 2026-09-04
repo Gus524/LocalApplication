@@ -4,136 +4,223 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.goodgus.localapplication.shared.components.InfoCard
-import com.goodgus.localapplication.compras.data.repository.Compra
-import com.goodgus.localapplication.compras.ui.viewModels.CompraViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goodgus.localapplication.compras.domain.model.Compra
+import com.goodgus.localapplication.compras.domain.model.CompraId
+import com.goodgus.localapplication.compras.domain.model.EstadoCompra
+import com.goodgus.localapplication.compras.domain.model.InformacionCompra
+import com.goodgus.localapplication.compras.ui.viewModels.CompraAction
+import com.goodgus.localapplication.compras.ui.viewModels.CompraEffect
+import com.goodgus.localapplication.compras.ui.viewModels.CompraUiState
+import com.goodgus.localapplication.compras.ui.viewModels.CompraViewModel
+import com.goodgus.localapplication.core.domain.Dinero
+import com.goodgus.localapplication.core.theme.LocalApplicationTheme
+import com.goodgus.localapplication.core.ui.components.buttons.BotonEliminar
+import com.goodgus.localapplication.core.ui.components.dialogs.DialogoAlerta
+import com.goodgus.localapplication.core.ui.components.dialogs.DialogoConfirmacion
 
 @Composable
 fun CompraScreen(
     navigateToDetalle: (String) -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: CompraViewModel = hiltViewModel()
-){
-    val uiState by viewModel.uiState.collectAsState()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if(uiState.compras.isNotEmpty()){
-        ShowCompras(
-            compras = uiState.compras,
-            navigateToDetalle = navigateToDetalle,
-            uiState = uiState,
-            viewModel = viewModel
-        )
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is CompraEffect.NavegarANuevaCompra -> navigateToDetalle("")
+            }
+        }
+    }
+
+    CompraContent(
+        state = uiState,
+        onAction = viewModel::onAction,
+        onNavigateToDetalle = navigateToDetalle,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun CompraContent(
+    state: CompraUiState,
+    onAction: (CompraAction) -> Unit,
+    onNavigateToDetalle: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (state.compras.isEmpty()) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "No hay compras registradas",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Button(onClick = { onAction(CompraAction.OnNuevaCompra) }) {
+                    Text("Registrar Compra")
+                }
+            }
+        }
     } else {
-        Button(
-            onClick = { navigateToDetalle("") },
+        val listState = rememberLazyListState()
+        val isFabVisible by remember {
+            derivedStateOf {
+                listState.firstVisibleItemIndex == 0 || !listState.isScrollInProgress
+            }
+        }
+
+        Box(modifier = modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(
+                    items = state.compras,
+                    key = { it.id.valor }
+                ) { compra ->
+                    CompraItemCard(
+                        compra = compra,
+                        onCancelar = { onAction(CompraAction.OnSolicitarCancelarCompra(compra.id.valor)) },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = isFabVisible,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(24.dp),
+                enter = fadeIn(animationSpec = tween(200)),
+                exit = fadeOut(animationSpec = tween(200))
+            ) {
+                FloatingActionButton(
+                    onClick = { onAction(CompraAction.OnNuevaCompra) }
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Nueva compra")
+                }
+            }
+        }
+    }
+
+    if (state.mostrarDialogoCancelar) {
+        DialogoConfirmacion(
+            titulo = "Cancelar Compra",
+            mensaje = "¿Seguro que deseas cancelar esta compra? Se revertirá el stock de los productos.",
+            onConfirmar = { onAction(CompraAction.OnConfirmarCancelarCompra) },
+            onDescartar = { onAction(CompraAction.OnDescartarCancelarCompra) },
+            textoConfirmar = "Cancelar Compra",
+            esDestructivo = true
+        )
+    }
+
+    state.mensajeAlerta?.let { mensaje ->
+        DialogoAlerta(
+            mensaje = mensaje,
+            onAceptar = { onAction(CompraAction.OnDismissAlerta) }
+        )
+    }
+}
+
+@Composable
+fun CompraItemCard(
+    compra: Compra,
+    onCancelar: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(30.dp)
-                .padding(16.dp)
-                .size(1.dp)
-        ) {
-            Text("Agregar una compra")
-        }
-    }
-}
-
-@Composable
-fun ShowCompras(
-    compras: List<Compra>,
-    navigateToDetalle: (String) -> Unit,
-    uiState: CompraViewModel.CompraUIState,
-    viewModel: CompraViewModel
-) {
-    val listState = rememberLazyListState()
-    var isFabVisible by remember { mutableStateOf(true) }
-    var previousIndex by remember { mutableIntStateOf(0) }
-
-    isFabVisible = remember {
-        derivedStateOf {
-            val currentFirstVisibleIndex = listState.firstVisibleItemIndex
-            val isScrollingUp = currentFirstVisibleIndex < previousIndex
-            previousIndex = currentFirstVisibleIndex // Actualiza previousIndex aquí
-            isScrollingUp || listState.firstVisibleItemIndex == 0 // Muestra el FAB si sube o está en el primer elemento
-        }
-    }.value
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize()
-        ){
-            items(compras) { compra ->
-                CompraCard(
-                    compra = compra,
-                    onDetails = { navigateToDetalle(compra.idCompra.toString()) },
-                )
-            }
-        }
-
-        AnimatedVisibility(
-            visible = isFabVisible,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            enter = fadeIn(animationSpec = tween(durationMillis = 300)),
-            exit = fadeOut(animationSpec = tween(durationMillis = 300))
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingActionButton(
-                onClick = { navigateToDetalle("") },
-            ) {
-                Icon(
-                    Icons.Filled.Add,
-                    contentDescription = "Add compra"
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Compra #${compra.id.valor}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Fecha: ${compra.informacion.fechaCompra}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Total: $${compra.informacion.total.monto}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Estado: ${if (compra.estaRegistrada) "Completada" else "Cancelada"}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (compra.estaRegistrada) {
+                BotonEliminar(
+                    onClick = onCancelar,
+                    contentDescription = "Cancelar compra"
                 )
             }
         }
     }
 }
 
+@PreviewLightDark
 @Composable
-fun CompraCard(
-    compra: Compra,
-    onDetails: (Compra) -> Unit
-) {
-    val compraData = listOf(
-        "ID" to compra.idCompra.toString(),
-        "Total" to compra.totalCompra.toString(),
-        "Fecha" to compra.fechaCompra.toString()
-    )
-    InfoCard(
-        title = "Compra",
-        dataList = compraData,
-        onEditClick = { onDetails(compra) },
-        onDeleteClick = {},
-        modifier = Modifier.padding(4.dp)
-    )
+private fun CompraContentPreview() {
+    LocalApplicationTheme {
+        CompraContent(
+            state = CompraUiState(
+                compras = listOf(
+                    Compra(
+                        id = CompraId(1),
+                        informacion = InformacionCompra(
+                            fechaCompra = "2026-09-03",
+                            total = Dinero(350.0),
+                            estado = EstadoCompra.REGISTRADA
+                        )
+                    )
+                )
+            ),
+            onAction = {},
+            onNavigateToDetalle = {}
+        )
+    }
 }

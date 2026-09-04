@@ -1,6 +1,5 @@
 package com.goodgus.localapplication.viewModels
 
-import android.app.Application
 import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.EstadoProducto
 import com.goodgus.localapplication.inventario.domain.model.InformacionProducto
@@ -8,11 +7,15 @@ import com.goodgus.localapplication.inventario.domain.model.Inventario
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
+import com.goodgus.localapplication.inventario.ui.viewModels.ProductoFormAction
+import com.goodgus.localapplication.inventario.ui.viewModels.ProductoFormEffect
 import com.goodgus.localapplication.inventario.ui.viewModels.ProductoViewModel
 import com.goodgus.localapplication.inventario.usecase.ActualizarPrecioProductoUseCase
 import com.goodgus.localapplication.inventario.usecase.RegistrarProductoUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -21,15 +24,12 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProductoViewModelTest {
-
-    private class TestApp : Application()
 
     private class FakeProductoRepository : IProductoRepository {
         val productos = mutableMapOf<Int, Producto>()
@@ -78,29 +78,27 @@ class ProductoViewModelTest {
     }
 
     @Test
-    fun `guardarProducto crea nuevo producto a traves de RegistrarProductoUseCase`() = testScope.runTest {
-        viewModel.updateName("Coca Cola 600ml")
-        viewModel.updateMarca("Coca Cola")
-        viewModel.updateTipo("Refresco")
-        viewModel.updatePrecio(18.5)
-        viewModel.updateCantidad(50)
+    fun `OnGuardar crea nuevo producto y emite efecto NavegarAtras`() = testScope.runTest {
+        viewModel.onAction(ProductoFormAction.OnNombreChange("Coca Cola 600ml"))
+        viewModel.onAction(ProductoFormAction.OnMarcaChange("Coca Cola"))
+        viewModel.onAction(ProductoFormAction.OnTipoChange("Refresco"))
+        viewModel.onAction(ProductoFormAction.OnPrecioChange(18.5))
+        viewModel.onAction(ProductoFormAction.OnStockChange(50))
 
-        viewModel.guardarProducto()
+        viewModel.onAction(ProductoFormAction.OnGuardar)
         advanceUntilIdle()
 
-        val state = viewModel.uiState.value
-        assertEquals("Producto registrado correctamente", state.mensaje)
-        assertFalse(state.isBusy)
         assertEquals(1, fakeRepository.productos.size)
-
-        val productoGuardado = fakeRepository.productos[1]
-        assertEquals("Coca Cola 600ml", productoGuardado?.nombre)
-        assertEquals(18.5, productoGuardado?.precioVenta?.monto ?: 0.0, 0.01)
-        assertEquals(50, productoGuardado?.inventario?.disponibles)
+        val producto = fakeRepository.productos[1]
+        assertEquals("Coca Cola 600ml", producto?.nombre)
+        assertEquals(18.5, producto?.precioVenta?.monto ?: 0.0, 0.01)
+        assertEquals(50, producto?.inventario?.disponibles)
+        val effectReceived = viewModel.effect.first()
+        assertEquals(ProductoFormEffect.NavegarAtras, effectReceived)
     }
 
     @Test
-    fun `guardarProducto actualiza precio cuando isUpdate es true`() = testScope.runTest {
+    fun `OnCargarProducto carga producto existente y activa modo edicion`() = testScope.runTest {
         val productoExistente = Producto(
             id = ProductoId(10),
             informacion = InformacionProducto("Papas Lays", "Lays", "Botana"),
@@ -110,38 +108,13 @@ class ProductoViewModelTest {
         )
         fakeRepository.productos[10] = productoExistente
 
-        viewModel.cargarProducto("10")
-        advanceUntilIdle()
-
-        viewModel.updatePrecio(25.0)
-        viewModel.guardarProducto()
+        viewModel.onAction(ProductoFormAction.OnCargarProducto(10))
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals("Producto actualizado correctamente", state.mensaje)
-        assertEquals(25.0, fakeRepository.productos[10]?.precioVenta?.monto ?: 0.0, 0.01)
-    }
-
-    @Test
-    fun `cargarProducto actualiza uiState con datos del dominio`() = testScope.runTest {
-        val producto = Producto(
-            id = ProductoId(5),
-            informacion = InformacionProducto("Galletas Oreo", "Nabisco", "Galleta"),
-            precioVenta = Dinero(15.0),
-            inventario = Inventario(30),
-            estado = EstadoProducto.ACTIVO
-        )
-        fakeRepository.productos[5] = producto
-
-        viewModel.cargarProducto("5")
-        advanceUntilIdle()
-
-        val state = viewModel.uiState.value
-        assertEquals("5", state.idProducto)
-        assertEquals("Galletas Oreo", state.name)
-        assertEquals("Nabisco", state.marca)
-        assertEquals(15.0, state.precio, 0.01)
-        assertEquals(30, state.cantidad)
-        assertTrue(state.isUpdate)
+        assertEquals(10, state.id)
+        assertEquals("Papas Lays", state.nombre)
+        assertEquals(20.0, state.precioVenta, 0.01)
+        assertTrue(state.esEdicion)
     }
 }

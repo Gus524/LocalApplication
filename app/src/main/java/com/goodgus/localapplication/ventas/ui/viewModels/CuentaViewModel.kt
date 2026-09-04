@@ -2,9 +2,7 @@ package com.goodgus.localapplication.ventas.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
-import com.goodgus.localapplication.ventas.data.repository.Cuenta
-import com.goodgus.localapplication.ventas.data.repository.GetCuenta
+import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import com.goodgus.localapplication.ventas.usecase.AbrirCuentaParams
 import com.goodgus.localapplication.ventas.usecase.AbrirCuentaUseCase
@@ -13,110 +11,164 @@ import com.goodgus.localapplication.ventas.usecase.CancelarVentaUseCase
 import com.goodgus.localapplication.ventas.usecase.CerrarCuentaParams
 import com.goodgus.localapplication.ventas.usecase.CerrarCuentaUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+data class CuentaUiState(
+    val cuentaActiva: Cuenta? = null,
+    val idVentaEliminar: Int? = null,
+    val mostrarDialogoEliminarVenta: Boolean = false,
+    val mostrarDialogoCerrarCuenta: Boolean = false,
+    val mensajeAlerta: String? = null
+)
+
+sealed interface CuentaAction {
+    data object OnCargarCuenta : CuentaAction
+    data object OnAbrirCuenta : CuentaAction
+    data object OnSolicitarCerrarCuenta : CuentaAction
+    data object OnConfirmarCerrarCuenta : CuentaAction
+    data object OnCancelarCerrarCuenta : CuentaAction
+    data class OnSolicitarEliminarVenta(val idVenta: Int) : CuentaAction
+    data object OnConfirmarEliminarVenta : CuentaAction
+    data object OnCancelarEliminarVenta : CuentaAction
+    data object OnDismissAlerta : CuentaAction
+    data object OnNuevaVenta : CuentaAction
+    data class OnEditarVenta(val idVenta: Int) : CuentaAction
+}
+
+sealed interface CuentaEffect {
+    data object NavegarANuevaVenta : CuentaEffect
+    data class NavegarAEditarVenta(val idVenta: Int) : CuentaEffect
+}
+
 @HiltViewModel
 class CuentaViewModel @Inject constructor(
     private val abrirCuentaUseCase: AbrirCuentaUseCase,
     private val cerrarCuentaUseCase: CerrarCuentaUseCase,
     private val cancelarVentaUseCase: CancelarVentaUseCase,
-    private val cuentaRepository: ICuentaRepository,
-    private val cuentaDAO: CuentaDAO
+    private val cuentaRepository: ICuentaRepository
 ) : ViewModel() {
-    data class CuentaUIState(
-        val cuenta: Flow<Any> = emptyFlow(),
-        val showDelete: Boolean = false,
-        val idVenta: Int = 0,
-        val showClose: Boolean = false,
-        val cuentaSinVentas: List<Cuenta> = emptyList()
-    )
 
-    private val _uiState = MutableStateFlow(CuentaUIState())
-    val uiState: StateFlow<CuentaUIState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(CuentaUiState())
+    val uiState: StateFlow<CuentaUiState> = _uiState.asStateFlow()
 
-    val cuenta: StateFlow<List<GetCuenta>> = cuentaDAO.getCuentaActiva()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    private val _effect = Channel<CuentaEffect>(Channel.BUFFERED)
+    val effect: Flow<CuentaEffect> = _effect.receiveAsFlow()
 
-    fun closeCuenta() {
-        viewModelScope.launch {
-            val cuentaActiva = cuentaRepository.obtenerCuentaActiva()
-            if (cuentaActiva != null) {
-                cerrarCuentaUseCase(CerrarCuentaParams(cuentaId = cuentaActiva.id.valor))
+    init {
+        cargarCuenta()
+    }
+
+    fun onAction(action: CuentaAction) {
+        when (action) {
+            is CuentaAction.OnCargarCuenta -> cargarCuenta()
+            is CuentaAction.OnAbrirCuenta -> abrirCuenta()
+            is CuentaAction.OnSolicitarCerrarCuenta -> _uiState.update { it.copy(mostrarDialogoCerrarCuenta = true) }
+            is CuentaAction.OnConfirmarCerrarCuenta -> confirmarCerrarCuenta()
+            is CuentaAction.OnCancelarCerrarCuenta -> _uiState.update { it.copy(mostrarDialogoCerrarCuenta = false) }
+            is CuentaAction.OnSolicitarEliminarVenta -> _uiState.update {
+                it.copy(mostrarDialogoEliminarVenta = true, idVentaEliminar = action.idVenta)
             }
-            _uiState.update { it.copy(showClose = false) }
+            is CuentaAction.OnConfirmarEliminarVenta -> confirmarEliminarVenta()
+            is CuentaAction.OnCancelarEliminarVenta -> _uiState.update {
+                it.copy(mostrarDialogoEliminarVenta = false, idVentaEliminar = null)
+            }
+            is CuentaAction.OnDismissAlerta -> _uiState.update { it.copy(mensajeAlerta = null) }
+            is CuentaAction.OnNuevaVenta -> _effect.trySend(CuentaEffect.NavegarANuevaVenta)
+            is CuentaAction.OnEditarVenta -> _effect.trySend(CuentaEffect.NavegarAEditarVenta(action.idVenta))
         }
     }
 
-    fun openCuenta() {
+    private fun cargarCuenta() {
+        viewModelScope.launch {
+            val cuenta = cuentaRepository.obtenerCuentaActiva()
+            _uiState.update { it.copy(cuentaActiva = cuenta) }
+        }
+    }
+
+    private fun abrirCuenta() {
         val today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         viewModelScope.launch {
-            abrirCuentaUseCase(AbrirCuentaParams(fecha = today))
-            tryCuenta()
-        }
-    }
-
-    fun tryCuenta() {
-        viewModelScope.launch {
-            val cuentaActiva = cuentaRepository.obtenerCuentaActiva()
-            val listaSinVentas = if (cuentaActiva != null && cuentaActiva.ventas.isEmpty()) {
-                listOf(
-                    Cuenta(
-                        idCuenta = cuentaActiva.id.valor,
-                        fechaCuenta = cuentaActiva.informacion.fecha,
-                        estadoCuenta = 1
-                    )
-                )
-            } else {
-                emptyList()
-            }
-            _uiState.update { it.copy(cuentaSinVentas = listaSinVentas) }
-        }
-    }
-
-    fun showClose() {
-        _uiState.update { it.copy(showClose = true) }
-    }
-
-    fun showAlert(idVenta: Int) {
-        _uiState.update { it.copy(showDelete = true, idVenta = idVenta) }
-    }
-
-    fun closeAlert() {
-        _uiState.update { it.copy(showDelete = false, showClose = false) }
-    }
-
-    fun deleteVenta() {
-        val estado = _uiState.value
-        val idVenta = estado.idVenta
-
-        viewModelScope.launch {
-            if (idVenta != 0) {
-                val cuentaActiva = cuentaRepository.obtenerCuentaActiva()
-                if (cuentaActiva != null) {
-                    cancelarVentaUseCase(
-                        CancelarVentaParams(
-                            cuentaId = cuentaActiva.id.valor,
-                            ventaId = idVenta
-                        )
-                    )
+            val resultado = abrirCuentaUseCase(AbrirCuentaParams(fecha = today))
+            resultado.fold(
+                onSuccess = {
+                    cargarCuenta()
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(mensajeAlerta = "Error: ${error.message ?: "No se pudo abrir la cuenta"}")
+                    }
                 }
-            }
-            _uiState.update { it.copy(showDelete = false, idVenta = 0) }
+            )
+        }
+    }
+
+    private fun confirmarCerrarCuenta() {
+        val cuenta = _uiState.value.cuentaActiva ?: return
+        viewModelScope.launch {
+            val resultado = cerrarCuentaUseCase(CerrarCuentaParams(cuentaId = cuenta.id.valor))
+            resultado.fold(
+                onSuccess = {
+                    _uiState.update {
+                        it.copy(
+                            cuentaActiva = null,
+                            mostrarDialogoCerrarCuenta = false,
+                            mensajeAlerta = "Cuenta cerrada exitosamente"
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            mostrarDialogoCerrarCuenta = false,
+                            mensajeAlerta = "Error: ${error.message ?: "No se pudo cerrar la cuenta"}"
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    private fun confirmarEliminarVenta() {
+        val cuenta = _uiState.value.cuentaActiva ?: return
+        val idVenta = _uiState.value.idVentaEliminar ?: return
+        viewModelScope.launch {
+            val resultado = cancelarVentaUseCase(
+                CancelarVentaParams(
+                    cuentaId = cuenta.id.valor,
+                    ventaId = idVenta
+                )
+            )
+            resultado.fold(
+                onSuccess = {
+                    cargarCuenta()
+                    _uiState.update {
+                        it.copy(
+                            mostrarDialogoEliminarVenta = false,
+                            idVentaEliminar = null,
+                            mensajeAlerta = "Venta anulada correctamente"
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            mostrarDialogoEliminarVenta = false,
+                            idVentaEliminar = null,
+                            mensajeAlerta = "Error: ${error.message ?: "No se pudo anular la venta"}"
+                        )
+                    }
+                }
+            )
         }
     }
 }

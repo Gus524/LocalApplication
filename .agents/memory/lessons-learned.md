@@ -33,7 +33,14 @@ For any new domain module, feature, or phase:
   * Existing Room models (`models/data/*`) remain as internal persistence data layer, decoupled from Domain via Mappers.
   * Abstract `BaseRepository` in data layer will unify shared CRUD operations and enforce `IMapper<TDomain, TPersistence>` implementations to eliminate boilerplate.
 
-## 3. Environment & Execution Runtime
+## 3. Compose UI & Component Design Standards
+* **Focused, High-Signal Components (Minimal Parameter Footprint):**
+  * Avoid hyper-generic composables with dozens of optional/boilerplate parameters.
+  * Favor concise, purpose-built components tailored to specific UI needs (e.g. `CampoTexto(valor, onValorChange, label)`, `CampoMoneda(precio, onPrecioChange, label)`, `CampoLectura(texto, label)`, `CampoCantidad(cantidad, onCantidadChange)`).
+  * Leaf and form composables must expose small, ergonomic parameter lists (3-5 focused parameters) ensuring high maintainability, readability, and zero call-site friction.
+
+## 4. Environment & Execution Runtime
 * Bazzite OS with Java 25 (`java-dev` distrobox exported to `~/.local/bin/`).
 * `gradle.properties` includes `kotlin.jvm.target.validation.mode=warning` for JDK 25 compatibility.
 * Test runner: `./gradlew testDebugUnitTest`.
+
