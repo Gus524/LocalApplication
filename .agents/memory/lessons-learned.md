@@ -44,3 +44,20 @@ For any new domain module, feature, or phase:
 * `gradle.properties` includes `kotlin.jvm.target.validation.mode=warning` for JDK 25 compatibility.
 * Test runner: `./gradlew testDebugUnitTest`.
 
+## 5. UI/UX, Navigation & Persistence Patterns
+* **Global Decoupled Snackbar Lifecycle (`SnackbarManager`):**
+  * *Rejected Anti-Pattern:* Calling `snackbarHostState.showSnackbar()` inside a screen coroutine scope right before `onNavegarAtras()`. The coroutine is cancelled when the Composable leaves composition, causing dropped/lost snackbars.
+  * *Corrected Behavior:* Route messages through a global decoupled `SnackbarManager` (buffered `Channel<String>`), collected continuously by the root `AppScaffold`.
+* **Room `@DatabaseView` for Reactive Multi-Table Aggregates:**
+  * *Rejected Anti-Pattern:* Using complex manual joins or single-table queries that do not notify Room when related child tables change.
+  * *Corrected Behavior:* Model multi-table joined projections with `@DatabaseView` (e.g. `GetCuenta`), which Room monitors across all participating tables to automatically emit reactive updates through `Flow`.
+* **Centralized Navigation 3 Back Navigation:**
+  * *Rejected Anti-Pattern:* Adding back buttons inside the screen content area or duplicating `TopAppBar` on child screens.
+  * *Corrected Behavior:* Inspect `currentRoute` in root `AppScaffold`. If the current route is not a top-level bottom-bar screen, dynamically render the `ArrowBack` navigation icon in the centralized `TopAppBar`.
+* **NuBank-Style Currency Input (`CampoMoneda`):**
+  * *Rejected Anti-Pattern:* Raw text fields with string-to-float parsing on comma/dot causing cursor jumps and input glitches.
+  * *Corrected Behavior:* Parse input string as continuous raw integer cents and divide by 100 on each keystroke, achieving natural right-to-left decimal shift.
+* **Eye-Friendly Semantic Status Badges (`BadgeEstado`):**
+  * *Rejected Anti-Pattern:* Using harsh, ultra-saturated bright reds for warnings/critical inventory chips that cause visual fatigue.
+  * *Corrected Behavior:* Use balanced darker tones (e.g., `#991B1B` on `#FDE8E8`) with icon + quantity and no redundant text in dense lists.
+
