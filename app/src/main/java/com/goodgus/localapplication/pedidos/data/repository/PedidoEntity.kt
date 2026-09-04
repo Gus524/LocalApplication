@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
  * Desacoplada del modelo de dominio puro.
  */
 @Entity(tableName = "Pedidos")
-data class Pedidos(
+data class PedidoEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_pedido")
     val idPedido: Int = 0,

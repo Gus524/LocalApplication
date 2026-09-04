@@ -5,17 +5,15 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.goodgus.localapplication.compras.data.repository.CompraDAO
-import com.goodgus.localapplication.compras.data.repository.CompraProductoDAO
 import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
 import com.goodgus.localapplication.pedidos.data.repository.PedidosDAO
 import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
-import com.goodgus.localapplication.ventas.data.repository.VentaDAO
-import com.goodgus.localapplication.compras.data.repository.Compra
-import com.goodgus.localapplication.compras.data.repository.CompraProducto
-import com.goodgus.localapplication.ventas.data.repository.Cuenta
-import com.goodgus.localapplication.pedidos.data.repository.Pedidos
-import com.goodgus.localapplication.inventario.data.repository.Producto
-import com.goodgus.localapplication.ventas.data.repository.Venta
+import com.goodgus.localapplication.compras.data.repository.CompraEntity
+import com.goodgus.localapplication.compras.data.repository.CompraProductoEntity
+import com.goodgus.localapplication.ventas.data.repository.CuentaEntity
+import com.goodgus.localapplication.pedidos.data.repository.PedidoEntity
+import com.goodgus.localapplication.inventario.data.repository.ProductoEntity
+import com.goodgus.localapplication.ventas.data.repository.VentaEntity
 import com.goodgus.localapplication.ventas.data.repository.GetCuenta
 
 /**
@@ -23,7 +21,7 @@ import com.goodgus.localapplication.ventas.data.repository.GetCuenta
  */
 
 @Database(
-    entities = [Producto::class, Venta::class, Cuenta::class, Pedidos::class, Compra::class, CompraProducto::class],
+    entities = [ProductoEntity::class, VentaEntity::class, CuentaEntity::class, PedidoEntity::class, CompraEntity::class, CompraProductoEntity::class],
     views = [GetCuenta::class],
     version = 1,
     exportSchema = false
@@ -35,11 +33,9 @@ import com.goodgus.localapplication.ventas.data.repository.GetCuenta
 
 abstract class AppDataBase: RoomDatabase() {
     abstract fun productoDao(): ProductoDAO
-    abstract fun ventaDao(): VentaDAO
     abstract fun cuentaDao(): CuentaDAO
     abstract fun pedidosDAO(): PedidosDAO
     abstract fun compraDAO(): CompraDAO
-    abstract fun compraProductoDAO(): CompraProductoDAO
 
     companion object {
         @Volatile
@@ -52,8 +48,6 @@ abstract class AppDataBase: RoomDatabase() {
                     AppDataBase::class.java,
                     "db_local.db",
                 )
-                    .createFromAsset(databaseFilePath = "database/db_local.db")
-                    .fallbackToDestructiveMigrationFrom(6)
                     .build()
                 INSTANCE = instance
                 instance

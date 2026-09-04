@@ -11,6 +11,7 @@ import com.goodgus.localapplication.ventas.usecase.CancelarVentaUseCase
 import com.goodgus.localapplication.ventas.usecase.CerrarCuentaParams
 import com.goodgus.localapplication.ventas.usecase.CerrarCuentaUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,13 +65,15 @@ class CuentaViewModel @Inject constructor(
     private val _effect = Channel<CuentaEffect>(Channel.BUFFERED)
     val effect: Flow<CuentaEffect> = _effect.receiveAsFlow()
 
+    private var cuentaJob: Job? = null
+
     init {
-        cargarCuenta()
+        observarCuenta()
     }
 
     fun onAction(action: CuentaAction) {
         when (action) {
-            is CuentaAction.OnCargarCuenta -> cargarCuenta()
+            is CuentaAction.OnCargarCuenta -> observarCuenta()
             is CuentaAction.OnAbrirCuenta -> abrirCuenta()
             is CuentaAction.OnSolicitarCerrarCuenta -> _uiState.update { it.copy(mostrarDialogoCerrarCuenta = true) }
             is CuentaAction.OnConfirmarCerrarCuenta -> confirmarCerrarCuenta()
@@ -88,10 +91,12 @@ class CuentaViewModel @Inject constructor(
         }
     }
 
-    private fun cargarCuenta() {
-        viewModelScope.launch {
-            val cuenta = cuentaRepository.obtenerCuentaActiva()
-            _uiState.update { it.copy(cuentaActiva = cuenta) }
+    private fun observarCuenta() {
+        cuentaJob?.cancel()
+        cuentaJob = viewModelScope.launch {
+            cuentaRepository.observarCuentaActiva().collect { cuenta ->
+                _uiState.update { it.copy(cuentaActiva = cuenta) }
+            }
         }
     }
 
@@ -101,7 +106,7 @@ class CuentaViewModel @Inject constructor(
             val resultado = abrirCuentaUseCase(AbrirCuentaParams(fecha = today))
             resultado.fold(
                 onSuccess = {
-                    cargarCuenta()
+                    observarCuenta()
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -150,7 +155,6 @@ class CuentaViewModel @Inject constructor(
             )
             resultado.fold(
                 onSuccess = {
-                    cargarCuenta()
                     _uiState.update {
                         it.copy(
                             mostrarDialogoEliminarVenta = false,

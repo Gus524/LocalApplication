@@ -6,9 +6,12 @@ import com.goodgus.localapplication.compras.data.mapper.CompraMapper
 import com.goodgus.localapplication.compras.domain.model.Compra
 import com.goodgus.localapplication.compras.domain.model.CompraId
 import com.goodgus.localapplication.compras.domain.repository.ICompraRepository
-import com.goodgus.localapplication.compras.data.repository.Compra as CompraEntity
+import com.goodgus.localapplication.compras.data.repository.CompraEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CompraRepository @Inject constructor(
@@ -32,6 +35,12 @@ class CompraRepository @Inject constructor(
         CompraId((dao.getMaxId() ?: 0) + 1)
     }.getOrDefault(CompraId(1))
 
+    override fun observarTodos(): Flow<List<Compra>> {
+        return dao.observarTodos()
+            .map { entities -> toDomainList(entities) }
+            .flowOn(ioDispatcher)
+    }
+
     override suspend fun onHydrateAggregate(id: CompraId): Compra? {
         val entity = onHydrateQuery(id) ?: return null
         val items = dao.getItemsByCompraId(id.valor)
@@ -51,7 +60,6 @@ class CompraRepository @Inject constructor(
             }
             dao.insertCompraProductos(itemEntities)
         }
-        Unit
     }
 
     override suspend fun actualizar(agregado: Compra): Result<Unit> = executeIo {
@@ -67,6 +75,5 @@ class CompraRepository @Inject constructor(
             }
             dao.insertCompraProductos(itemEntities)
         }
-        Unit
     }
 }

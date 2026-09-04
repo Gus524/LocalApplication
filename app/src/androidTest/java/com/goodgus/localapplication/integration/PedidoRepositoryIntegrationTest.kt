@@ -13,6 +13,7 @@ import com.goodgus.localapplication.pedidos.domain.model.PedidoId
 import com.goodgus.localapplication.pedidos.domain.model.PlazoEntrega
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -67,5 +68,28 @@ class PedidoRepositoryIntegrationTest {
         assertEquals("Con decorado de café", retrieved?.informacion?.detalles)
         assertEquals(null, retrieved?.plazo?.fechaEntrega)
         assertEquals(EstadoPedido.PENDIENTE, retrieved?.estado)
+    }
+
+    @Test
+    fun observarTodos_emite_automaticamente_al_insertar_un_pedido() = runTest {
+        val flow = repository.observarTodos()
+        var lastEmitted: List<Pedido>? = null
+        backgroundScope.launch(Dispatchers.Unconfined) {
+            flow.collect { lastEmitted = it }
+        }
+
+        assertEquals(0, lastEmitted?.size ?: 0)
+
+        repository.guardar(
+            Pedido(
+                id = PedidoId(1),
+                informacion = InformacionPedido("Gelatina de Fresa", "Con frutas"),
+                plazo = PlazoEntrega("2026-09-03", null),
+                estado = EstadoPedido.PENDIENTE
+            )
+        )
+
+        assertEquals(1, lastEmitted?.size)
+        assertEquals("Gelatina de Fresa", lastEmitted?.first()?.informacion?.descripcion)
     }
 }

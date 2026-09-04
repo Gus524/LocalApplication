@@ -68,13 +68,13 @@ fun NavigationWrapper() {
                         }
                     )
                 }
-                entry<AppRoute.Compras> {
-                    CompraScreen(
-                        navigateToDetalle = { idCompra ->
-                            backStack.add(AppRoute.CompraProducto(idCompra = idCompra))
-                        }
-                    )
-                }
+//                entry<AppRoute.Compras> {
+//                    CompraScreen(
+//                        navigateToDetalle = { idCompra ->
+//                            backStack.add(AppRoute.CompraProducto(idCompra = idCompra))
+//                        }
+//                    )
+//                }
                 entry<AppRoute.Venta> { ventaKey ->
                     VentaScreen(
                         idVenta = ventaKey.idVenta,

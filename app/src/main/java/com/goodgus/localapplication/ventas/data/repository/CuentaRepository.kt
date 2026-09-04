@@ -2,13 +2,16 @@ package com.goodgus.localapplication.ventas.data.repository
 
 import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
 import com.goodgus.localapplication.core.data.repository.BaseRepository
-import com.goodgus.localapplication.ventas.data.repository.Cuenta as CuentaEntity
+import com.goodgus.localapplication.ventas.data.repository.CuentaEntity
 import com.goodgus.localapplication.ventas.data.mapper.CuentaMapper
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.repository.ICuentaRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CuentaRepository @Inject constructor(
@@ -48,6 +51,25 @@ class CuentaRepository @Inject constructor(
         onHydrateAggregate(CuentaId(activaEntity.idCuenta))
     }.getOrNull()
 
+    override fun observarCuentaActiva(): Flow<Cuenta?> {
+        return dao.getCuentaActiva()
+            .map { list ->
+                val primerItem = list.firstOrNull()
+                if (primerItem != null) {
+                    onHydrateAggregate(CuentaId(primerItem.idCuenta))
+                } else {
+                    val activas = dao.getCuentaActivaNoVentas()
+                    val activaEntity = activas.firstOrNull()
+                    if (activaEntity != null) {
+                        onHydrateAggregate(CuentaId(activaEntity.idCuenta))
+                    } else {
+                        null
+                    }
+                }
+            }
+            .flowOn(ioDispatcher)
+    }
+
     override suspend fun guardar(agregado: Cuenta): Result<Unit> = executeIo {
         val entity = cuentaMapper.toPersistence(agregado)
         dao.insert(entity)
@@ -57,7 +79,6 @@ class CuentaRepository @Inject constructor(
             }
             dao.insertVentas(ventasEntities)
         }
-        Unit
     }
 
     override suspend fun actualizar(agregado: Cuenta): Result<Unit> = executeIo {
@@ -73,6 +94,5 @@ class CuentaRepository @Inject constructor(
             }
             dao.insertVentas(ventasEntities)
         }
-        Unit
     }
 }

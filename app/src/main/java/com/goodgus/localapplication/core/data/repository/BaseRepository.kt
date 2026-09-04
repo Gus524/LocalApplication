@@ -6,6 +6,8 @@ import com.goodgus.localapplication.core.domain.AggregateRoot
 import com.goodgus.localapplication.core.domain.IRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 /**
@@ -53,10 +55,15 @@ abstract class BaseRepository<TAggregate : AggregateRoot<TId>, TId, TPersistence
         toDomainList(onGetAllQuery())
     }.getOrDefault(emptyList())
 
+    override fun observarTodos(): Flow<List<TAggregate>> {
+        return flow {
+            emit(obtenerTodos())
+        }
+    }
+
     override suspend fun guardar(agregado: TAggregate): Result<Unit> = executeIo {
         val persistence = mapper.toPersistence(agregado)
         dao.insert(persistence)
-        Unit
     }
 
     override suspend fun actualizar(agregado: TAggregate): Result<Unit> = executeIo {
@@ -72,7 +79,6 @@ abstract class BaseRepository<TAggregate : AggregateRoot<TId>, TId, TPersistence
         if (persistence != null) {
             dao.delete(persistence)
         }
-        Unit
     }
 
     // --- Helpers protegidos para listas y despacho ---

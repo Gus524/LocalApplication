@@ -11,25 +11,25 @@ import kotlinx.coroutines.flow.Flow
  * Interfaz de los querys para nuestra tabla Cuenta y sus líneas de venta
  */
 @Dao
-interface CuentaDAO : BaseDao<Cuenta> {
+interface CuentaDAO : BaseDao<CuentaEntity> {
 
     @Query("SELECT * FROM Cuenta WHERE id_cuenta = :id")
-    fun getById(id: Int): Cuenta?
+    fun getById(id: Int): CuentaEntity?
 
     @Query("SELECT * FROM Cuenta")
-    fun getAll(): List<Cuenta>
+    fun getAll(): List<CuentaEntity>
 
     @Query("SELECT MAX(id_cuenta) FROM Cuenta")
     fun getMaxId(): Int?
 
     @Query("SELECT * FROM Cuenta")
-    fun getCuenta(): Flow<List<Cuenta>>
+    fun getCuenta(): Flow<List<CuentaEntity>>
 
     @Query("SELECT * FROM GetCuenta WHERE estado_cuenta = 1 AND estado_venta = 1 ORDER BY id_venta DESC")
     fun getCuentaActiva(): Flow<List<GetCuenta>>
 
     @Query("SELECT * FROM Cuenta WHERE estado_cuenta = 1")
-    fun getCuentaActivaNoVentas(): List<Cuenta>
+    fun getCuentaActivaNoVentas(): List<CuentaEntity>
 
     @Query("SELECT * FROM GetCuenta WHERE id_venta = :idVenta")
     fun getVentaId(idVenta: Int): GetCuenta?
@@ -41,10 +41,10 @@ interface CuentaDAO : BaseDao<Cuenta> {
     fun getAccountId(): Int
 
     @Query("SELECT * FROM Venta WHERE id_cuenta = :idCuenta")
-    fun getVentasByCuentaId(idCuenta: Int): List<Venta>
+    fun getVentasByCuentaId(idCuenta: Int): List<VentaEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertVentas(ventas: List<Venta>): List<Long>
+    fun insertVentas(ventas: List<VentaEntity>): List<Long>
 
     @Query("DELETE FROM Venta WHERE id_cuenta = :idCuenta")
     fun deleteVentasByCuentaId(idCuenta: Int): Int

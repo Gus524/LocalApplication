@@ -7,6 +7,7 @@ import com.goodgus.localapplication.inventario.domain.repository.IProductoReposi
 import com.goodgus.localapplication.inventario.usecase.CambiarEstadoProductoParams
 import com.goodgus.localapplication.inventario.usecase.CambiarEstadoProductoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,8 +54,10 @@ class InventarioViewModel @Inject constructor(
     private val _effect = Channel<InventarioEffect>(Channel.BUFFERED)
     val effect: Flow<InventarioEffect> = _effect.receiveAsFlow()
 
+    private var searchJob: Job? = null
+
     init {
-        cargarProductos()
+        observarProductos()
     }
 
     fun onAction(action: InventarioAction) {
@@ -68,29 +71,30 @@ class InventarioViewModel @Inject constructor(
                 it.copy(mostrarDialogoEliminar = false, idProductoEliminar = null)
             }
             is InventarioAction.OnDismissAlerta -> _uiState.update { it.copy(mensajeAlerta = null) }
-            is InventarioAction.OnCargarProductos -> cargarProductos()
+            is InventarioAction.OnCargarProductos -> observarProductos()
             is InventarioAction.OnEditarProducto -> _effect.trySend(InventarioEffect.NavegarAEditar(action.idProducto))
             is InventarioAction.OnCrearProducto -> _effect.trySend(InventarioEffect.NavegarACrear)
         }
     }
 
-    private fun cargarProductos() {
-        viewModelScope.launch {
-            val lista = productoRepository.obtenerTodos()
-            _uiState.update { it.copy(productos = lista) }
+    private fun observarProductos() {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            val query = _uiState.value.busqueda
+            val flow = if (query.isBlank()) {
+                productoRepository.observarTodos()
+            } else {
+                productoRepository.observarPorCriterio(query)
+            }
+            flow.collect { lista ->
+                _uiState.update { it.copy(productos = lista) }
+            }
         }
     }
 
     private fun buscar(query: String) {
         _uiState.update { it.copy(busqueda = query) }
-        viewModelScope.launch {
-            val lista = if (query.isBlank()) {
-                productoRepository.obtenerTodos()
-            } else {
-                productoRepository.buscarPorCriterio(query)
-            }
-            _uiState.update { it.copy(productos = lista) }
-        }
+        observarProductos()
     }
 
     private fun confirmarEliminar() {
@@ -101,7 +105,6 @@ class InventarioViewModel @Inject constructor(
             )
             resultado.fold(
                 onSuccess = {
-                    cargarProductos()
                     _uiState.update {
                         it.copy(
                             mostrarDialogoEliminar = false,

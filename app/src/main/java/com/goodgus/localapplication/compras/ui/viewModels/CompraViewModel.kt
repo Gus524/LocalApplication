@@ -9,6 +9,7 @@ import com.goodgus.localapplication.compras.usecase.CancelarCompraUseCase
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraParams
 import com.goodgus.localapplication.compras.usecase.RegistrarCompraUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,13 +54,15 @@ class CompraViewModel @Inject constructor(
     private val _effect = Channel<CompraEffect>(Channel.BUFFERED)
     val effect: Flow<CompraEffect> = _effect.receiveAsFlow()
 
+    private var comprasJob: Job? = null
+
     init {
-        cargarCompras()
+        observarCompras()
     }
 
     fun onAction(action: CompraAction) {
         when (action) {
-            is CompraAction.OnCargarCompras -> cargarCompras()
+            is CompraAction.OnCargarCompras -> observarCompras()
             is CompraAction.OnRegistrarCompra -> registrarCompra(action.params)
             is CompraAction.OnSolicitarCancelarCompra -> _uiState.update {
                 it.copy(mostrarDialogoCancelar = true, idCompraCancelar = action.idCompra)
@@ -73,10 +76,12 @@ class CompraViewModel @Inject constructor(
         }
     }
 
-    private fun cargarCompras() {
-        viewModelScope.launch {
-            val lista = compraRepository.obtenerTodos()
-            _uiState.update { it.copy(compras = lista) }
+    private fun observarCompras() {
+        comprasJob?.cancel()
+        comprasJob = viewModelScope.launch {
+            compraRepository.observarTodos().collect { lista ->
+                _uiState.update { it.copy(compras = lista) }
+            }
         }
     }
 
@@ -85,7 +90,6 @@ class CompraViewModel @Inject constructor(
             val resultado = registrarCompraUseCase(params)
             resultado.fold(
                 onSuccess = {
-                    cargarCompras()
                     _uiState.update { it.copy(mensajeAlerta = "Compra registrada correctamente") }
                 },
                 onFailure = { error ->
@@ -101,7 +105,6 @@ class CompraViewModel @Inject constructor(
             val resultado = cancelarCompraUseCase(CancelarCompraParams(compraId = id))
             resultado.fold(
                 onSuccess = {
-                    cargarCompras()
                     _uiState.update {
                         it.copy(
                             mostrarDialogoCancelar = false,

@@ -14,6 +14,7 @@ import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -88,5 +89,28 @@ class ProductoRepositoryIntegrationTest {
         val results = repository.buscarPorCriterio("Fresa")
         assertEquals(1, results.size)
         assertEquals("Yogurt Fresa", results[0].nombre)
+    }
+
+    @Test
+    fun observarTodos_emite_automaticamente_nueva_lista_cuando_se_inserta_un_producto() = runTest {
+        val initialList = repository.observarTodos()
+        var lastEmitted: List<Producto>? = null
+        backgroundScope.launch(Dispatchers.Unconfined) {
+            initialList.collect { lastEmitted = it }
+        }
+
+        assertEquals(0, lastEmitted?.size ?: 0)
+
+        repository.guardar(
+            Producto(
+                id = ProductoId(1),
+                informacion = InformacionProducto("Arroz 1kg", "SOS", "Granos"),
+                precioVenta = Dinero(35.0),
+                inventario = Inventario(20)
+            )
+        )
+
+        assertEquals(1, lastEmitted?.size)
+        assertEquals("Arroz 1kg", lastEmitted?.first()?.nombre)
     }
 }

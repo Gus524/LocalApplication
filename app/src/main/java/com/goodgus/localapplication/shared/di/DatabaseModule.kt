@@ -3,11 +3,9 @@ package com.goodgus.localapplication.shared.di
 import android.content.Context
 import com.goodgus.localapplication.core.data.dao.AppDataBase
 import com.goodgus.localapplication.compras.data.repository.CompraDAO
-import com.goodgus.localapplication.compras.data.repository.CompraProductoDAO
 import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
 import com.goodgus.localapplication.pedidos.data.repository.PedidosDAO
 import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
-import com.goodgus.localapplication.ventas.data.repository.VentaDAO
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,11 +33,5 @@ object DatabaseModule {
     fun provideCompraDAO(db: AppDataBase): CompraDAO = db.compraDAO()
 
     @Provides
-    fun provideCompraProductoDAO(db: AppDataBase): CompraProductoDAO = db.compraProductoDAO()
-
-    @Provides
     fun provideCuentaDAO(db: AppDataBase): CuentaDAO = db.cuentaDao()
-
-    @Provides
-    fun provideVentaDAO(db: AppDataBase): VentaDAO = db.ventaDao()
 }

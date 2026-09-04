@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.goodgus.localapplication.inventario.data.repository.Producto
+import com.goodgus.localapplication.inventario.data.repository.ProductoEntity
 
 /**
  * Entidades de persistencia Room para las tablas Compra y Compra_Producto.
@@ -13,7 +13,7 @@ import com.goodgus.localapplication.inventario.data.repository.Producto
  */
 
 @Entity(tableName = "Compra")
-data class Compra(
+data class CompraEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_compra")
     val idCompra: Int = 0,
@@ -27,12 +27,12 @@ data class Compra(
     tableName = "Compra_Producto",
     foreignKeys = [
         ForeignKey(
-            entity = Compra::class,
+            entity = CompraEntity::class,
             parentColumns = ["id_compra"],
             childColumns = ["id_compra"]
         ),
         ForeignKey(
-            entity = Producto::class,
+            entity = ProductoEntity::class,
             parentColumns = ["id_producto"],
             childColumns = ["id_producto"]
         )
@@ -42,7 +42,7 @@ data class Compra(
         Index(value = ["id_producto"])
     ]
 )
-data class CompraProducto(
+data class CompraProductoEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_compra_producto")
     val idCompraProducto: Int = 0,

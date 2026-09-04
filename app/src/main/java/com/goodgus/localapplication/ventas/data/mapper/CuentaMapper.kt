@@ -4,8 +4,8 @@ import com.goodgus.localapplication.core.data.mapper.IMapper
 import com.goodgus.localapplication.core.domain.Cantidad
 import com.goodgus.localapplication.core.domain.Dinero
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
-import com.goodgus.localapplication.ventas.data.repository.Cuenta as CuentaEntity
-import com.goodgus.localapplication.ventas.data.repository.Venta as VentaEntity
+import com.goodgus.localapplication.ventas.data.repository.CuentaEntity
+import com.goodgus.localapplication.ventas.data.repository.VentaEntity
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
 import com.goodgus.localapplication.ventas.domain.model.CuentaId
 import com.goodgus.localapplication.ventas.domain.model.DetalleVenta

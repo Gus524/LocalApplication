@@ -1,10 +1,8 @@
 package com.goodgus.localapplication.core.navigation
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

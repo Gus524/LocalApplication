@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.goodgus.localapplication.core.data.dao.AppDataBase
 import com.goodgus.localapplication.core.domain.Cantidad
 import com.goodgus.localapplication.core.domain.Dinero
-import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
+import com.goodgus.localapplication.inventario.data.repository.ProductoEntity as ProductoEntity
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.ventas.data.repository.CuentaRepository
 import com.goodgus.localapplication.ventas.domain.model.Cuenta
@@ -20,6 +20,7 @@ import com.goodgus.localapplication.ventas.domain.model.Venta
 import com.goodgus.localapplication.ventas.domain.model.VentaId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -94,5 +95,47 @@ class CuentaRepositoryIntegrationTest {
         assertEquals(1, retrieved?.ventas?.size)
         assertEquals("Galletas Marías", retrieved?.ventas?.first()?.nombreProducto)
         assertEquals(32.0, retrieved?.informacion?.total?.monto ?: 0.0, 0.01)
+    }
+
+    @Test
+    fun observarCuentaActiva_emite_actualizacion_cuando_se_agregan_nuevas_ventas() = runTest {
+        val cuentaInicial = Cuenta(
+            id = CuentaId(1),
+            informacion = InformacionCuenta(
+                fecha = "2026-09-03",
+                estado = EstadoCuenta.ABIERTA,
+                total = Dinero(0.0)
+            ),
+            ventas = emptyList()
+        )
+        repository.guardar(cuentaInicial)
+
+        val flow = repository.observarCuentaActiva()
+        var lastCuenta: Cuenta? = null
+        backgroundScope.launch(Dispatchers.Unconfined) {
+            flow.collect { lastCuenta = it }
+        }
+
+        assertEquals(0, lastCuenta?.ventas?.size ?: 0)
+
+        val cuentaConVenta = cuentaInicial.copy(
+            ventas = listOf(
+                Venta(
+                    id = VentaId(1),
+                    productoId = ProductoId(1),
+                    nombreProducto = "Galletas Marías",
+                    detalle = DetalleVenta(
+                        cantidad = Cantidad(1),
+                        hora = "11:00",
+                        precioUnitario = Dinero(16.0)
+                    ),
+                    estado = EstadoVenta.ACTIVA
+                )
+            )
+        )
+        repository.actualizar(cuentaConVenta)
+
+        assertEquals(1, lastCuenta?.ventas?.size)
+        assertEquals("Galletas Marías", lastCuenta?.ventas?.first()?.nombreProducto)
     }
 }

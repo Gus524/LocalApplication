@@ -15,10 +15,11 @@ import com.goodgus.localapplication.compras.domain.model.ProductoCompradoId
 import com.goodgus.localapplication.core.data.dao.AppDataBase
 import com.goodgus.localapplication.core.domain.Cantidad
 import com.goodgus.localapplication.core.domain.Dinero
-import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
+import com.goodgus.localapplication.inventario.data.repository.ProductoEntity as ProductoEntity
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -91,5 +92,26 @@ class CompraRepositoryIntegrationTest {
         assertEquals(1, retrieved?.productos?.size)
         assertEquals("Aceite 1L", retrieved?.productos?.first()?.nombreProducto)
         assertEquals(300.0, retrieved?.informacion?.total?.monto ?: 0.0, 0.01)
+    }
+
+    @Test
+    fun observarTodos_emite_automaticamente_cuando_se_registra_una_compra() = runTest {
+        val flow = repository.observarTodos()
+        var lastList: List<Compra>? = null
+        backgroundScope.launch(Dispatchers.Unconfined) {
+            flow.collect { lastList = it }
+        }
+
+        assertEquals(0, lastList?.size ?: 0)
+
+        repository.guardar(
+            Compra(
+                id = CompraId(1),
+                informacion = InformacionCompra("2026-09-03", EstadoCompra.REGISTRADA, Dinero(100.0)),
+                productos = emptyList()
+            )
+        )
+
+        assertEquals(1, lastList?.size)
     }
 }

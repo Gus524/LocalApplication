@@ -9,6 +9,7 @@ import com.goodgus.localapplication.pedidos.usecase.CancelarPedidoUseCase
 import com.goodgus.localapplication.pedidos.usecase.EntregarPedidoParams
 import com.goodgus.localapplication.pedidos.usecase.EntregarPedidoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,13 +56,15 @@ class PedidosViewModel @Inject constructor(
     private val _effect = Channel<PedidosEffect>(Channel.BUFFERED)
     val effect: Flow<PedidosEffect> = _effect.receiveAsFlow()
 
+    private var pedidosJob: Job? = null
+
     init {
-        cargarPedidos()
+        observarPedidos()
     }
 
     fun onAction(action: PedidosAction) {
         when (action) {
-            is PedidosAction.OnCargarPedidos -> cargarPedidos()
+            is PedidosAction.OnCargarPedidos -> observarPedidos()
             is PedidosAction.OnEntregarPedido -> entregarPedido(action.idPedido)
             is PedidosAction.OnSolicitarCancelarPedido -> _uiState.update {
                 it.copy(mostrarDialogoCancelar = true, idPedidoCancelar = action.idPedido)
@@ -76,10 +79,12 @@ class PedidosViewModel @Inject constructor(
         }
     }
 
-    private fun cargarPedidos() {
-        viewModelScope.launch {
-            val lista = pedidoRepository.obtenerTodos()
-            _uiState.update { it.copy(pedidos = lista) }
+    private fun observarPedidos() {
+        pedidosJob?.cancel()
+        pedidosJob = viewModelScope.launch {
+            pedidoRepository.observarTodos().collect { lista ->
+                _uiState.update { it.copy(pedidos = lista) }
+            }
         }
     }
 
@@ -88,7 +93,6 @@ class PedidosViewModel @Inject constructor(
             val resultado = entregarPedidoUseCase(EntregarPedidoParams(pedidoId = id))
             resultado.fold(
                 onSuccess = {
-                    cargarPedidos()
                     _uiState.update { it.copy(mensajeAlerta = "Pedido marcado como entregado") }
                 },
                 onFailure = { error ->
@@ -104,7 +108,6 @@ class PedidosViewModel @Inject constructor(
             val resultado = cancelarPedidoUseCase(CancelarPedidoParams(pedidoId = id))
             resultado.fold(
                 onSuccess = {
-                    cargarPedidos()
                     _uiState.update {
                         it.copy(
                             mostrarDialogoCancelar = false,

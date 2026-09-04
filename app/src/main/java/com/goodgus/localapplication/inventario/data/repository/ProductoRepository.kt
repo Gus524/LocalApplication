@@ -5,9 +5,11 @@ import com.goodgus.localapplication.inventario.data.mapper.ProductoMapper
 import com.goodgus.localapplication.inventario.domain.model.Producto
 import com.goodgus.localapplication.inventario.domain.model.ProductoId
 import com.goodgus.localapplication.inventario.domain.repository.IProductoRepository
-import com.goodgus.localapplication.inventario.data.repository.Producto as ProductoEntity
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ProductoRepository @Inject constructor(
@@ -28,7 +30,19 @@ class ProductoRepository @Inject constructor(
         ProductoId((dao.getMaxId() ?: 0) + 1)
     }.getOrDefault(ProductoId(1))
 
+    override fun observarTodos(): Flow<List<Producto>> {
+        return dao.observarTodos()
+            .map { entities -> toDomainList(entities) }
+            .flowOn(ioDispatcher)
+    }
+
     override suspend fun buscarPorCriterio(criterio: String): List<Producto> = executeIo {
         toDomainList(dao.searchProduct(criterio))
     }.getOrDefault(emptyList())
+
+    override fun observarPorCriterio(criterio: String): Flow<List<Producto>> {
+        return dao.observarSearchProduct(criterio)
+            .map { entities -> toDomainList(entities) }
+            .flowOn(ioDispatcher)
+    }
 }
