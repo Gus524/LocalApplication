@@ -1,0 +1,138 @@
+package com.goodgus.localapplication.viewModels
+
+import com.goodgus.localapplication.pedidos.domain.model.EstadoPedido
+import com.goodgus.localapplication.pedidos.domain.model.InformacionPedido
+import com.goodgus.localapplication.pedidos.domain.model.Pedido
+import com.goodgus.localapplication.pedidos.domain.model.PedidoId
+import com.goodgus.localapplication.pedidos.domain.model.PlazoEntrega
+import com.goodgus.localapplication.pedidos.domain.repository.IPedidoRepository
+import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosAction
+import com.goodgus.localapplication.pedidos.ui.viewModels.PedidosViewModel
+import com.goodgus.localapplication.pedidos.usecase.CancelarPedidoUseCase
+import com.goodgus.localapplication.pedidos.usecase.EntregarPedidoUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class PedidosViewModelTest {
+
+    private class FakePedidoRepository : IPedidoRepository {
+        val pedidos = mutableMapOf<Int, Pedido>()
+        private var idCounter = 1
+
+        override suspend fun siguienteId(): PedidoId = PedidoId(idCounter++)
+        override suspend fun obtenerPorId(id: PedidoId): Pedido? = pedidos[id.valor]
+        override suspend fun guardar(agregado: Pedido): Result<Unit> {
+            pedidos[agregado.id.valor] = agregado
+            return Result.success(Unit)
+        }
+        override suspend fun actualizar(agregado: Pedido): Result<Unit> {
+            pedidos[agregado.id.valor] = agregado
+            return Result.success(Unit)
+        }
+        override suspend fun eliminar(id: PedidoId): Result<Unit> {
+            pedidos.remove(id.valor)
+            return Result.success(Unit)
+        }
+        override suspend fun obtenerTodos(): List<Pedido> = pedidos.values.toList()
+    }
+
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+
+    private lateinit var fakeRepository: FakePedidoRepository
+    private lateinit var entregarPedidoUseCase: EntregarPedidoUseCase
+    private lateinit var cancelarPedidoUseCase: CancelarPedidoUseCase
+    private lateinit var viewModel: PedidosViewModel
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        fakeRepository = FakePedidoRepository()
+        entregarPedidoUseCase = EntregarPedidoUseCase(fakeRepository)
+        cancelarPedidoUseCase = CancelarPedidoUseCase(fakeRepository)
+
+        fakeRepository.pedidos[1] = Pedido(
+            id = PedidoId(1),
+            informacion = InformacionPedido("Pastel de chocolate", "Para 20 personas"),
+            plazo = PlazoEntrega("2026-09-03", "2026-09-05"),
+            estado = EstadoPedido.PENDIENTE
+        )
+
+        viewModel = PedidosViewModel(fakeRepository, entregarPedidoUseCase, cancelarPedidoUseCase)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `inicializacion carga pedidos correctamente en uiState`() = testScope.runTest {
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(1, state.pedidos.size)
+        assertEquals("Pastel de chocolate", state.pedidos[0].informacion.descripcion)
+    }
+
+    @Test
+    fun `OnEntregarPedido marca el pedido como entregado`() = testScope.runTest {
+        advanceUntilIdle()
+        viewModel.onAction(PedidosAction.OnEntregarPedido(1))
+        advanceUntilIdle()
+
+        assertEquals(EstadoPedido.ENTREGADO, fakeRepository.pedidos[1]?.estado)
+        assertNull(viewModel.uiState.value.mensajeAlerta)
+    }
+
+    @Test
+    fun `OnFiltrarEstado filtra pedidos y calcula conteos correctamente`() = testScope.runTest {
+        fakeRepository.pedidos[2] = Pedido(
+            id = PedidoId(2),
+            informacion = InformacionPedido("Gelatina de fresa", null),
+            plazo = PlazoEntrega("2026-09-03", "2026-09-04"),
+            estado = EstadoPedido.ENTREGADO
+        )
+        fakeRepository.pedidos[3] = Pedido(
+            id = PedidoId(3),
+            informacion = InformacionPedido("Galletas surtidas", null),
+            plazo = PlazoEntrega("2026-09-03", null),
+            estado = EstadoPedido.CANCELADO
+        )
+
+        viewModel.onAction(PedidosAction.OnCargarPedidos)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(3, state.contarPorEstado(null))
+        assertEquals(1, state.contarPorEstado(EstadoPedido.PENDIENTE))
+        assertEquals(1, state.contarPorEstado(EstadoPedido.ENTREGADO))
+        assertEquals(1, state.contarPorEstado(EstadoPedido.CANCELADO))
+
+        // Filtrar por PENDIENTE
+        viewModel.onAction(PedidosAction.OnFiltrarEstado(EstadoPedido.PENDIENTE))
+        assertEquals(1, viewModel.uiState.value.pedidosFiltrados.size)
+        assertEquals(PedidoId(1), viewModel.uiState.value.pedidosFiltrados[0].id)
+
+        // Filtrar por ENTREGADO
+        viewModel.onAction(PedidosAction.OnFiltrarEstado(EstadoPedido.ENTREGADO))
+        assertEquals(1, viewModel.uiState.value.pedidosFiltrados.size)
+        assertEquals(PedidoId(2), viewModel.uiState.value.pedidosFiltrados[0].id)
+
+        // Volver a Todos (null)
+        viewModel.onAction(PedidosAction.OnFiltrarEstado(null))
+        assertEquals(3, viewModel.uiState.value.pedidosFiltrados.size)
+    }
+}

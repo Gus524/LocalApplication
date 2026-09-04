@@ -1,159 +1,150 @@
 package com.goodgus.localapplication.core.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import com.goodgus.localapplication.components.AppScaffold
-import com.goodgus.localapplication.utilidades.extractRuta
-import com.goodgus.localapplication.utilidades.getContext
-import com.goodgus.localapplication.utilidades.getTitle
-import com.goodgus.localapplication.viewModels.EditPedidoViewModel
-import com.goodgus.localapplication.viewModels.HomeViewModel
-import com.goodgus.localapplication.viewModels.InventarioViewModel
-import com.goodgus.localapplication.viewModels.PedidosViewModel
-import com.goodgus.localapplication.viewModels.ProductoViewModel
-import com.goodgus.localapplication.viewModels.VentaViewModel
-import com.goodgus.localapplication.views.EditPedidoScreen
-import com.goodgus.localapplication.views.HomeScreen
-import com.goodgus.localapplication.views.InventarioScreen
-import com.goodgus.localapplication.views.PedidoScreen
-import com.goodgus.localapplication.views.ProductoScreen
-import com.goodgus.localapplication.views.VentaScreen
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.goodgus.localapplication.shared.components.AppScaffold
+import com.goodgus.localapplication.compras.ui.views.CompraScreen
+import com.goodgus.localapplication.inventario.ui.views.InventarioScreen
+import com.goodgus.localapplication.inventario.ui.views.ProductoScreen
+import com.goodgus.localapplication.pedidos.ui.views.EditPedidoScreen
+import com.goodgus.localapplication.pedidos.ui.views.PedidoScreen
+import com.goodgus.localapplication.ventas.ui.views.DetalleCuentaScreen
+import com.goodgus.localapplication.ventas.ui.views.HistorialScreen
+import com.goodgus.localapplication.ventas.ui.views.HomeScreen
+import com.goodgus.localapplication.ventas.ui.views.VentaScreen
 
 /**
- * Composable encargado de la navegacion de toda nuestra aplicacion
- *
- * Se manejan las pantallas como objetos de tipo composable<>
- *
- *     TODO separar para que no este contenido aqui mismo el Scaffold, para separar el diseno del scaffold de la logica de navegacion
- *     ademas de implementar correctamente la creacion y evitar duplicacion de pantallas
+ * Composable encargado de la navegación de toda la aplicación utilizando Navigation 3.
  */
-
 @Composable
 fun NavigationWrapper() {
-    val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute: String = extractRuta(backStackEntry?.destination?.route) ?: Home.ruta
+    val backStack = rememberNavBackStack(AppRoute.Home)
+    val currentRoute: AppRoute = (backStack.lastOrNull() as? AppRoute) ?: AppRoute.Home
+
+
+    val onNavigateToTab: (AppRoute) -> Unit = { targetRoute ->
+        // Swap de raíz para pestañas principales
+        while (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+        backStack[0] = targetRoute
+    }
 
     AppScaffold(
         currentRoute = currentRoute,
-        navController = navController,
-        searchText = "",
-        onTextChange = { },
-        showSearch = false,
-        title = getTitle(currentRoute),
-        content = { padding ->
-            NavHost(
-                navController = navController,
-                startDestination = Home,
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-            ) {
-                // Para cada pagina creamos un composable de tipo Screen.kt, agregamos la funcion de la clase <View> Screen
-                composable<Home> {
-                    // Obtenemos el contexto de la aplicacion para el viewModel
-                    val viewModel = viewModel<HomeViewModel>(
-                        factory = HomeViewModel.Factory(getContext())
-                    )
-                    // Codigo para navegacion con parametros
+        onTabSelected = onNavigateToTab,
+        onNavigateBack = if (backStack.size > 1) { { backStack.removeLastOrNull() } } else null
+    ) { padding ->
+        NavDisplay(
+            backStack = backStack,
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            entryProvider = entryProvider {
+                entry<AppRoute.Home> {
                     HomeScreen(
-                        navigateToVenta = { idVenta -> navController.navigate(Venta(idVenta = idVenta))},
-                        viewModel = viewModel
+                        navigateToVenta = { idVenta ->
+                            backStack.add(AppRoute.Venta(idVenta = idVenta))
+                        }
                     )
                 }
-                composable<Inventario>{
-                    val viewModel = viewModel<InventarioViewModel>(
-                        factory = InventarioViewModel.Factory(getContext())
-                    )
+                entry<AppRoute.Inventario> {
                     InventarioScreen(
-                        navigateToProducto = { idProducto -> navController.navigate(Producto(idProducto = idProducto))},
-                        viewModel = viewModel
+                        navigateToProducto = { idProducto ->
+                            backStack.add(AppRoute.Producto(idProducto = idProducto))
+                        }
                     )
                 }
-
-                composable<Pedidos>{
-                    val viewModel = viewModel<PedidosViewModel>(
-                        factory = PedidosViewModel.Factory(getContext())
-                    )
+                entry<AppRoute.Pedidos> {
                     PedidoScreen(
-                        navigateToPedido = { idPedido -> navController.navigate(EditPedido(""))},
-                        viewModel = viewModel
+                        navigateToPedido = { idPedido ->
+                            backStack.add(AppRoute.EditPedido(idPedido = idPedido.ifBlank { null }))
+                        }
                     )
                 }
-//                composable<Compras> {
-//                    val viewModel = viewModel<CompraViewModel>(
-//                        factory = CompraViewModel.Factory(getContext())
-//                    )
+                entry<AppRoute.Historial> {
+                    HistorialScreen(
+                        navigateToDetalle = { idCuenta ->
+                            backStack.add(AppRoute.DetalleCuenta(idCuenta = idCuenta))
+                        }
+                    )
+                }
+                entry<AppRoute.DetalleCuenta> { detalleKey ->
+                    DetalleCuentaScreen(
+                        idCuenta = detalleKey.idCuenta,
+                        navigateBack = {
+                            backStack.removeLastOrNull()
+                        }
+                    )
+                }
+//                entry<AppRoute.Compras> {
 //                    CompraScreen(
-//                        navigateToDetalle = { idCompra -> navController.navigate(CompraProducto(idCompra = idCompra))},
-//                        viewModel = viewModel
+//                        navigateToDetalle = { idCompra ->
+//                            backStack.add(AppRoute.CompraProducto(idCompra = idCompra))
+//                        }
 //                    )
 //                }
-                composable<Venta> { entry ->
-                    val venta = entry.toRoute<Venta>()
-                    val viewModel = viewModel<VentaViewModel>(
-                        factory = VentaViewModel.Factory(getContext())
-                    )
-
+                entry<AppRoute.Venta> { ventaKey ->
                     VentaScreen(
-                        venta.idVenta,
-                        navigateBack = { navController.navigate(Home){
-                            popUpTo<Home>()
-                        } },
-                        viewModel = viewModel
+                        idVenta = ventaKey.idVenta,
+                        navigateBack = {
+                            backStack.removeLastOrNull()
+                        }
                     )
                 }
-
-                composable<Producto> { entry ->
-                    val producto = entry.toRoute<Producto>()
-                    val viewModel = viewModel<ProductoViewModel>(
-                        factory = ProductoViewModel.Factory(getContext())
-                    )
-
+                entry<AppRoute.Producto> { productoKey ->
                     ProductoScreen(
-                        producto.idProducto,
-                        navigateBack = { navController.navigate(Inventario){
-                            popUpTo<Inventario>()
-                        } },
-                        viewModel = viewModel
+                        idProducto = productoKey.idProducto,
+                        navigateBack = {
+                            backStack.removeLastOrNull()
+                        }
                     )
                 }
-
-                composable<EditPedido> { entry ->
-                    val pedido = entry.toRoute<EditPedido>()
-                    val viewModel = viewModel<EditPedidoViewModel>(
-                        factory = EditPedidoViewModel.Factory(getContext())
-                    )
-
+                entry<AppRoute.EditPedido> { pedidoKey ->
                     EditPedidoScreen(
-                        pedido.idPedido,
-                        navigateBack = { navController.navigate(Pedidos){
-                            popUpTo<Pedidos>()
-                        } },
-                        viewModel = viewModel
+                        idPedido = pedidoKey.idPedido,
+                        navigateBack = {
+                            backStack.removeLastOrNull()
+                        }
                     )
                 }
+            },
+            transitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(250)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(250)
+                )
+            },
+            popTransitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(250)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(250)
+                )
+            },
+            predictivePopTransitionSpec = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(250)
+                ) togetherWith slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(250)
+                )
             }
-        }
-    )
+        )
+    }
 }
-
-/**
- * Lista de pantallas en las cuales se mostrara el navigationBar
- */
-
-val navigationBarScreens = listOf(
-    Home.ruta,
-    Inventario.ruta,
-    Pedidos.ruta
-//    Compras.ruta
-)

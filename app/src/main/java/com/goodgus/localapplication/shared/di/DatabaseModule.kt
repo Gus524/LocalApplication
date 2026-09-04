@@ -1,0 +1,37 @@
+package com.goodgus.localapplication.shared.di
+
+import android.content.Context
+import com.goodgus.localapplication.core.data.dao.AppDataBase
+import com.goodgus.localapplication.compras.data.repository.CompraDAO
+import com.goodgus.localapplication.ventas.data.repository.CuentaDAO
+import com.goodgus.localapplication.pedidos.data.repository.PedidosDAO
+import com.goodgus.localapplication.inventario.data.repository.ProductoDAO
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDataBase {
+        return AppDataBase.getInstance(context)
+    }
+
+    @Provides
+    fun provideProductoDAO(db: AppDataBase): ProductoDAO = db.productoDao()
+
+    @Provides
+    fun providePedidosDAO(db: AppDataBase): PedidosDAO = db.pedidosDAO()
+
+    @Provides
+    fun provideCompraDAO(db: AppDataBase): CompraDAO = db.compraDAO()
+
+    @Provides
+    fun provideCuentaDAO(db: AppDataBase): CuentaDAO = db.cuentaDao()
+}
